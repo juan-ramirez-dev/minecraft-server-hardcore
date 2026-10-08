@@ -1,0 +1,12 @@
+# Patrones (subcadena, sin mayúsculas) de .jar que NO van al server
+embeddium
+oculus
+sodiumdynamiclights
+sodiumoptionsapi
+betterzoom
+fusion-
+entity_model_features
+entity_texture_features
+entityculling
+immediatelyfast
+dynamic-fps

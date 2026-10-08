@@ -1,0 +1,35 @@
+# macOS / exFAT
+._*
+.DS_Store
+
+# Mundos, backups y datos de jugadores
+server/world*/
+backups/
+server/simplebackups/
+server/whitelist.json
+server/ops.json
+server/banned-ips.json
+server/banned-players.json
+server/usercache.json
+server/usernamecache.json
+
+# Generados / binarios / descargas (se reconstruyen con los scripts)
+jdk/
+tools/
+server/libraries/
+server/mods/
+server/logs/
+server/crash-reports/
+server/local/
+server/modernfix/
+server/kubejs/exported/
+server/rhino.local.properties
+server/boot-test.out
+server/*.jar
+pack/mods/*.jar
+pack/server-only/*.jar
+dist/*.mrpack
+dist/*.zip
+server/installer.log
+server/config/spark/tmp/
+server/config/spark/activity.json

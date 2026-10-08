@@ -1,0 +1,500 @@
+{
+  "__comment": [
+    "Mobs will be able to equip items declared here",
+    "The first number is the weight while the second number is the quality",
+    "Weight is the weight of an item. Higher weight means that the item is more likely to get choosen",
+    "Quality is a modifier applied to the weight. The final weight used is weight + quality * current difficulty"
+  ],
+  "MAINHAND": {
+    "born_in_chaos_v1:birch_branches": [
+      24642,
+      0.40784094
+    ],
+    "born_in_chaos_v1:carrot_sword": [
+      24069,
+      1.2063804
+    ],
+    "born_in_chaos_v1:dark_ritual_dagger": [
+      23911,
+      1.4096019
+    ],
+    "born_in_chaos_v1:darkwarblade": [
+      17970,
+      14.226674
+    ],
+    "born_in_chaos_v1:frostbitten_blade": [
+      23231,
+      2.2976365
+    ],
+    "born_in_chaos_v1:great_reaper_axe": [
+      23107,
+      3.1486528
+    ],
+    "born_in_chaos_v1:icy_sweetness": [
+      21701,
+      6.411711
+    ],
+    "born_in_chaos_v1:intoxicating_dagger": [
+      23231,
+      2.2976365
+    ],
+    "born_in_chaos_v1:nightmare_scythe": [
+      23824,
+      1.5219555
+    ],
+    "born_in_chaos_v1:nut_hammer": [
+      24697,
+      0.0469
+    ],
+    "born_in_chaos_v1:sharpened_dark_metal_sword": [
+      23206,
+      2.330707
+    ],
+    "born_in_chaos_v1:shell_mace": [
+      24367,
+      0.8234185
+    ],
+    "born_in_chaos_v1:skullbreaker_hammer": [
+      22046,
+      5.689535
+    ],
+    "born_in_chaos_v1:soul_cutlass": [
+      23911,
+      1.4096019
+    ],
+    "born_in_chaos_v1:soulbane": [
+      19830,
+      10.312961
+    ],
+    "born_in_chaos_v1:spider_bite_sword": [
+      23231,
+      2.2976365
+    ],
+    "born_in_chaos_v1:spiritual_sword": [
+      24272,
+      0.94598794
+    ],
+    "born_in_chaos_v1:supreme_measure": [
+      20,
+      53.470917
+    ],
+    "born_in_chaos_v1:sweet_axe": [
+      23994,
+      1.3027282
+    ],
+    "born_in_chaos_v1:sweet_sword": [
+      24069,
+      1.2063804
+    ],
+    "born_in_chaos_v1:trident_hayfork": [
+      24555,
+      0.56912816
+    ],
+    "born_in_chaos_v1:wood_splitter_axe": [
+      24518,
+      0.6222344
+    ],
+    "cataclysm:athame": [
+      24697,
+      0.0469
+    ],
+    "cataclysm:black_steel_axe": [
+      23739,
+      1.6320775
+    ],
+    "cataclysm:black_steel_sword": [
+      23826,
+      1.5193686
+    ],
+    "cataclysm:khopesh": [
+      23847,
+      1.4922183
+    ],
+    "minecraft:bow": [
+      22598,
+      4.508568
+    ],
+    "minecraft:crossbow": [
+      22892,
+      3.826627
+    ],
+    "minecraft:diamond_axe": [
+      22361,
+      5.022479
+    ],
+    "minecraft:diamond_sword": [
+      22423,
+      4.889481
+    ],
+    "minecraft:enchanted_book": [
+      23566,
+      1.8573177
+    ],
+    "minecraft:golden_axe": [
+      25022,
+      0.014399999
+    ],
+    "minecraft:golden_sword": [
+      25085,
+      0.0081
+    ],
+    "minecraft:iron_axe": [
+      24589,
+      0.51635593
+    ],
+    "minecraft:iron_sword": [
+      24676,
+      0.049
+    ],
+    "minecraft:lingering_potion{Potion:\"minecraft:harming\"}": [
+      23666,
+      1.7269388
+    ],
+    "minecraft:netherite_axe": [
+      21525,
+      6.778693
+    ],
+    "minecraft:netherite_sword": [
+      21595,
+      6.632802
+    ],
+    "minecraft:snowball": [
+      24616,
+      0.46844563
+    ],
+    "minecraft:splash_potion{Potion:\"minecraft:harming\"}": [
+      23666,
+      1.7269388
+    ],
+    "minecraft:stone_axe": [
+      24792,
+      0.0374
+    ],
+    "minecraft:stone_sword": [
+      24900,
+      0.026599998
+    ],
+    "minecraft:tnt": [
+      23466,
+      1.9881918
+    ],
+    "minecraft:trident": [
+      22666,
+      4.357304
+    ],
+    "minecraft:wooden_axe": [
+      24976,
+      0.019
+    ],
+    "minecraft:wooden_sword": [
+      25039,
+      0.0127
+    ],
+    "mowziesmobs:blowgun": [
+      22766,
+      4.129458
+    ],
+    "mowziesmobs:wrought_axe": [
+      24589,
+      0.51635593
+    ]
+  },
+  "OFFHAND": {
+    "cataclysm:azure_sea_shield": [
+      839,
+      2.0906117
+    ],
+    "cataclysm:black_steel_targe": [
+      187,
+      4.1986494
+    ],
+    "cataclysm:bulwark_of_the_flame": [
+      1867,
+      0.75949734
+    ],
+    "minecraft:ender_pearl": [
+      1517,
+      1.2102311
+    ],
+    "minecraft:flint_and_steel": [
+      1489,
+      1.2461817
+    ],
+    "minecraft:lava_bucket": [
+      1117,
+      1.7269388
+    ],
+    "minecraft:shield": [
+      1195,
+      1.6255897
+    ]
+  },
+  "FEET": {
+    "born_in_chaos_v1:dark_metal_armor_boots": [
+      1919,
+      5.3436694
+    ],
+    "born_in_chaos_v1:nightmare_mantleofthe_night_boots": [
+      3121,
+      2.0590668
+    ],
+    "cataclysm:cursium_boots": [
+      1229,
+      6.789111
+    ],
+    "cataclysm:ignitium_boots": [
+      19,
+      9.309818
+    ],
+    "minecraft:chainmail_boots": [
+      4283,
+      0.540316
+    ],
+    "minecraft:diamond_boots": [
+      3367,
+      1.7373508
+    ],
+    "minecraft:golden_boots": [
+      4349,
+      0.4136078
+    ],
+    "minecraft:iron_boots": [
+      4035,
+      0.8764657
+    ],
+    "minecraft:leather_boots": [
+      4631,
+      0.0244
+    ],
+    "minecraft:netherite_boots": [
+      3240,
+      1.9030677
+    ],
+    "mowziesmobs:geomancer_sandals": [
+      3443,
+      1.6385665
+    ]
+  },
+  "LEGS": {
+    "born_in_chaos_v1:dark_metal_armor_leggings": [
+      1919,
+      5.3436694
+    ],
+    "born_in_chaos_v1:nightmare_mantleofthe_night_leggings": [
+      3121,
+      2.0590668
+    ],
+    "cataclysm:cursium_leggings": [
+      1229,
+      6.789111
+    ],
+    "cataclysm:ignitium_leggings": [
+      19,
+      9.309818
+    ],
+    "minecraft:chainmail_leggings": [
+      4283,
+      0.540316
+    ],
+    "minecraft:diamond_leggings": [
+      3367,
+      1.7373508
+    ],
+    "minecraft:golden_leggings": [
+      4349,
+      0.4136078
+    ],
+    "minecraft:iron_leggings": [
+      4035,
+      0.8764657
+    ],
+    "minecraft:leather_leggings": [
+      4631,
+      0.0244
+    ],
+    "minecraft:netherite_leggings": [
+      3240,
+      1.9030677
+    ],
+    "mowziesmobs:geomancer_belt": [
+      3443,
+      1.6385665
+    ]
+  },
+  "CHEST": {
+    "born_in_chaos_v1:dark_metal_armor_chestplate": [
+      1919,
+      5.3436694
+    ],
+    "born_in_chaos_v1:nightmare_mantleofthe_night_chestplate": [
+      3121,
+      2.0590668
+    ],
+    "born_in_chaos_v1:spiny_shell_armor_chestplate": [
+      4285,
+      0.53719383
+    ],
+    "cataclysm:bloom_stone_pauldrons": [
+      2840,
+      3.0056863
+    ],
+    "cataclysm:bone_reptile_chestplate": [
+      1060,
+      7.1410875
+    ],
+    "cataclysm:cursium_chestplate": [
+      1229,
+      6.789111
+    ],
+    "cataclysm:ignitium_chestplate": [
+      19,
+      9.309818
+    ],
+    "cataclysm:ignitium_elytra_chestplate": [
+      19,
+      9.309818
+    ],
+    "minecraft:chainmail_chestplate": [
+      4283,
+      0.540316
+    ],
+    "minecraft:diamond_chestplate": [
+      3367,
+      1.7373508
+    ],
+    "minecraft:golden_chestplate": [
+      4349,
+      0.4136078
+    ],
+    "minecraft:iron_chestplate": [
+      4035,
+      0.8764657
+    ],
+    "minecraft:leather_chestplate": [
+      4631,
+      0.0244
+    ],
+    "minecraft:netherite_chestplate": [
+      3240,
+      1.9030677
+    ],
+    "mowziesmobs:geomancer_robe": [
+      3443,
+      1.6385665
+    ]
+  },
+  "HEAD": {
+    "born_in_chaos_v1:damned_demomans_hat_helmet": [
+      4574,
+      0.0301
+    ],
+    "born_in_chaos_v1:dark_metal_armor_helmet": [
+      1919,
+      5.3436694
+    ],
+    "born_in_chaos_v1:killer_rabbit_ears_helmet": [
+      4594,
+      0.028099999
+    ],
+    "born_in_chaos_v1:lord_pumpkinheads_hat_helmet": [
+      2613,
+      3.7963035
+    ],
+    "born_in_chaos_v1:missionary_hat_helmet": [
+      4469,
+      0.040599998
+    ],
+    "born_in_chaos_v1:nightmare_mantleofthe_night_helmet": [
+      3121,
+      2.0590668
+    ],
+    "born_in_chaos_v1:spiny_shell_armor_helmet": [
+      4285,
+      0.53719383
+    ],
+    "born_in_chaos_v1:spiritual_guide_sombrero_helmet": [
+      4494,
+      0.038099997
+    ],
+    "cataclysm:bone_reptile_helmet": [
+      1060,
+      7.1410875
+    ],
+    "cataclysm:cursium_helmet": [
+      1229,
+      6.789111
+    ],
+    "cataclysm:ignitium_helmet": [
+      19,
+      9.309818
+    ],
+    "cataclysm:monstrous_helm": [
+      3240,
+      1.9030677
+    ],
+    "minecraft:chainmail_helmet": [
+      4283,
+      0.540316
+    ],
+    "minecraft:diamond_helmet": [
+      3367,
+      1.7373508
+    ],
+    "minecraft:golden_helmet": [
+      4349,
+      0.4136078
+    ],
+    "minecraft:iron_helmet": [
+      4035,
+      0.8764657
+    ],
+    "minecraft:leather_helmet": [
+      4631,
+      0.0244
+    ],
+    "minecraft:netherite_helmet": [
+      3240,
+      1.9030677
+    ],
+    "minecraft:turtle_helmet": [
+      3979,
+      0.948558
+    ],
+    "mowziesmobs:geomancer_beads": [
+      3443,
+      1.6385665
+    ],
+    "mowziesmobs:sol_visage": [
+      4445,
+      0.042999998
+    ],
+    "mowziesmobs:umvuthana_mask_bliss": [
+      4719,
+      0.015599999
+    ],
+    "mowziesmobs:umvuthana_mask_faith": [
+      4719,
+      0.015599999
+    ],
+    "mowziesmobs:umvuthana_mask_fear": [
+      4719,
+      0.015599999
+    ],
+    "mowziesmobs:umvuthana_mask_fury": [
+      4719,
+      0.015599999
+    ],
+    "mowziesmobs:umvuthana_mask_misery": [
+      4719,
+      0.015599999
+    ],
+    "mowziesmobs:umvuthana_mask_rage": [
+      4719,
+      0.015599999
+    ],
+    "mowziesmobs:wrought_helmet": [
+      4449,
+      0.0426
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+[
+  {
+    "when": "onjoin",
+    "dimension": "minecraft:the_nether",
+    "hostile": true,
+    "healthmultiply": 1.5,
+    "damagemultiply": 1.5,
+    "speedmultiply": 1.1,
+    "result": "default"
+  },
+  {
+    "when": "onjoin",
+    "dimension": "minecraft:the_end",
+    "hostile": true,
+    "healthmultiply": 2.0,
+    "damagemultiply": 1.75,
+    "result": "default"
+  }
+]
