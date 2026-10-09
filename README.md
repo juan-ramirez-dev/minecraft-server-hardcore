@@ -9,6 +9,7 @@ sube con el tiempo y con cada jefe, Nether y End mucho más peligrosos, y mecán
   phantoms, francotiradores…) y cada 2 lunas llenas, **Furia de la Luna**.
 - **Cofre del Alma**: si alguien muere, aparece un cofre (normalmente en una Ciudad Antigua) con un ítem para revivirlo.
 - **Espectador restringido**: los muertos solo ven a través de los ojos de un jugador vivo.
+- **Alertas en el chat**: aviso cuando alguien queda con ≤ 3 ❤ o usa un Tótem de la Inmortalidad.
 
 Versión actual del pack: **1.1.0** — ver [CHANGELOG.md](CHANGELOG.md). Plan original: [plan-server-hardcore.md](plan-server-hardcore.md).
 

@@ -108,3 +108,8 @@ Backup del mundo v1.0: `backups/world-v1.0-20261007-224531/` (+ .tar.gz). Mundo 
 ### Sin verificar con un jugador real (no se puede desde la consola)
 - Clic en tragamonedas/cofre con esmeraldas, usar el Corazón del Alma renombrado, espectador pegado a un vivo,
   bloqueo de baldes/romper bloques por un jugador. Probarlo en la primera sesión.
+
+## 2026-10-09 — Alertas en el chat
+- `player_alerts.js`: aviso a todos cuando un jugador queda con ≤ 3 ❤ (se rearma al pasar de 5 ❤) y cuando usa un Tótem de la
+  Inmortalidad (objetivo `hc_totem`, estadística `minecraft.used:minecraft.totem_of_undying`). Incluye coordenadas y dimensión.
+- Verificado: carga sin errores en arranque de prueba. Sin probar con un jugador real.
