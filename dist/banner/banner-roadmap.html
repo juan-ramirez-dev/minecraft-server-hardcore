@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Hardcore Co-op — Qué vamos a jugar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0a0b;
+    --panel: #171213;
+    --line: #2e2224;
+    --red: #e0262f;
+    --red-dim: #7a1218;
+    --gold: #f5c542;
+    --green: #1bd96a;
+    --purple: #b46cf0;
+    --text: #efe7e4;
+    --muted: #a8999a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 1080px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 22px;
+    line-height: 1.45;
+  }
+  .wrap {
+    padding: 64px 60px 56px;
+    background:
+      radial-gradient(900px 420px at 50% -80px, rgba(224, 38, 47, .28), transparent 70%),
+      repeating-linear-gradient(0deg, transparent 0 39px, rgba(255,255,255,.018) 39px 40px),
+      repeating-linear-gradient(90deg, transparent 0 39px, rgba(255,255,255,.018) 39px 40px);
+  }
+  .hearts { display: flex; gap: 10px; justify-content: center; margin-bottom: 28px; }
+  .heart { width: 36px; height: 32px; }
+  h1 {
+    font-family: "Press Start 2P", monospace;
+    font-size: 54px; text-align: center; letter-spacing: 2px; line-height: 1.25;
+    text-shadow: 5px 5px 0 var(--red-dim);
+  }
+  .sub {
+    font-family: "Press Start 2P", monospace; font-size: 20px; text-align: center;
+    color: var(--red); margin-top: 22px; letter-spacing: 1px;
+  }
+  .tagline { text-align: center; color: var(--muted); margin-top: 16px; }
+  .tagline b { color: var(--text); }
+
+  .note {
+    margin-top: 34px; border: 3px solid var(--red);
+    background: linear-gradient(180deg, rgba(224,38,47,.14), rgba(224,38,47,.04));
+    padding: 20px 26px; font-size: 20px; color: var(--muted); text-align: center;
+  }
+  .note b { color: #fff; }
+
+  /* Progresión */
+  .route { margin-top: 30px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border: 2px solid var(--line); background: var(--panel); }
+  .route div { padding: 18px 10px 16px; text-align: center; border-right: 2px solid var(--line); position: relative; }
+  .route div:last-child { border-right: 0; }
+  .route b { display: block; font-family: "Press Start 2P", monospace; font-size: 15px; margin-bottom: 8px; }
+  .route span { font-size: 16px; color: var(--muted); }
+  .route .ow b { color: var(--green); }
+  .route .ne b { color: #ff6a3d; }
+  .route .en b { color: var(--purple); }
+  .route .dr b { color: var(--gold); }
+  .scale { margin-top: 10px; height: 10px; background: linear-gradient(90deg, var(--green), #ff6a3d, var(--purple), var(--red)); }
+  .scale-label { display: flex; justify-content: space-between; font-size: 15px; color: var(--muted); margin-top: 6px; }
+
+  /* Secciones */
+  .sec { margin-top: 44px; }
+  .sec-h { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; }
+  .sec-h .tag { font-family: "Press Start 2P", monospace; font-size: 15px; padding: 10px 12px; color: #0d0a0b; }
+  .sec-h p { font-size: 18px; color: var(--muted); }
+  .ya .tag { background: var(--green); }
+  .viene .tag { background: var(--gold); }
+  .tu .tag { background: var(--red); color: #fff; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .card { background: var(--panel); border: 2px solid var(--line); padding: 18px 20px 18px 22px; border-left-width: 5px; }
+  .ya .card { border-left-color: var(--green); }
+  .viene .card { border-left-color: var(--gold); }
+  .card h3 { font-size: 22px; font-weight: 800; line-height: 1.2; margin-bottom: 6px; }
+  .card p { font-size: 17.5px; color: var(--muted); line-height: 1.45; }
+  .card p b { color: var(--text); font-weight: 600; }
+  .card.wide { grid-column: span 2; }
+
+  .ask { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .ask div { background: var(--panel); border: 2px solid var(--line); padding: 16px 20px; font-size: 19px; font-weight: 600; }
+  .ask div::before { content: "?"; font-family: "Press Start 2P", monospace; color: var(--red); margin-right: 12px; font-size: 16px; }
+  .cta {
+    margin-top: 18px; text-align: center; padding: 22px; border: 3px dashed var(--red);
+    font-size: 21px; color: var(--muted);
+  }
+  .cta b { color: #fff; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hearts">
+    <svg class="heart" viewBox="0 0 9 8" shape-rendering="crispEdges"><path fill="#7a1218" d="M1 0h2v1h1v1h1V1h1V0h2v1h1v3H8v1H7v1H6v1H5v1H4V7H3V6H2V5H1V4H0V1h1z"/><path fill="#e0262f" d="M1 1h2v1h1v1h1V2h1V1h2v3H7v1H6v1H5v1H4V6H3V5H2V4H1z"/><path fill="#fff" d="M2 2h1v1H2z"/></svg>
+    <svg class="heart" viewBox="0 0 9 8" shape-rendering="crispEdges"><path fill="#7a1218" d="M1 0h2v1h1v1h1V1h1V0h2v1h1v3H8v1H7v1H6v1H5v1H4V7H3V6H2V5H1V4H0V1h1z"/><path fill="#e0262f" d="M1 1h2v1h1v1h1V2h1V1h2v3H7v1H6v1H5v1H4V6H3V5H2V4H1z"/><path fill="#fff" d="M2 2h1v1H2z"/></svg>
+    <svg class="heart" viewBox="0 0 9 8" shape-rendering="crispEdges"><path fill="#7a1218" d="M1 0h2v1h1v1h1V1h1V0h2v1h1v3H8v1H7v1H6v1H5v1H4V7H3V6H2V5H1V4H0V1h1z"/><path fill="#e0262f" d="M1 1h2v1h1v1h1V2h1V1h2v3H7v1H6v1H5v1H4V6H3V5H2V4H1z"/><path fill="#fff" d="M2 2h1v1H2z"/></svg>
+  </div>
+  <h1>HARDCORE<br>CO-OP</h1>
+  <div class="sub">A QUE VAMOS A JUGAR</div>
+  <p class="tagline">Todo lo que va a pasar en el server. <b>Léelo y dinos qué cambiarías.</b></p>
+
+  <div class="note"><b>Temporada de prueba:</b> el mundo se va a reiniciar varias veces mientras ajustamos el casino y la dificultad.</div>
+
+  <div class="route">
+    <div class="ow"><b>OVERWORLD</b><span>sobrevivir y equiparse</span></div>
+    <div class="ne"><b>NETHER</b><span>jefes y netherite</span></div>
+    <div class="en"><b>END</b><span>islas mucho más hostiles</span></div>
+    <div class="dr"><b>DRAGON</b><span>el final… si llegan</span></div>
+  </div>
+  <div class="scale"></div>
+  <div class="scale-label"><span>Día 1</span><span>La dificultad sube cada día que se juega →</span></div>
+
+  <section class="sec ya">
+    <div class="sec-h"><span class="tag">YA EN EL SERVER</span><p>Funciona desde el primer día</p></div>
+    <div class="grid">
+      <div class="card"><h3>Hardcore real</h3><p>Una sola vida. Si mueres quedas de espectador y <b>solo ves por los ojos de un vivo</b> (Shift para cambiar).</p></div>
+      <div class="card"><h3>Cofre del Alma</h3><p>Cuando alguien muere, <b>20–40 min después</b> aparece un cofre, casi siempre en una Ciudad Antigua. Coordenadas en el chat, dura 45 min. Trae el ítem para revivirlo.</p></div>
+      <div class="card"><h3>Spawn + Casino</h3><p>Zona segura: sin monstruos ni daño. <b>Tragamonedas</b> por 1 esmeralda y <b>Cofre del Destino</b> por 8. El jackpot puede dar un tótem.</p></div>
+      <div class="card"><h3>Eventos del Caos</h3><p>Cada ~20 min puede empezar uno: <b>Tormenta Eléctrica, La Cacería, Plaga de Arañas, Asedio, Cielo Hostil, Francotiradores</b>.</p></div>
+      <div class="card"><h3>Furia de la Luna</h3><p>Cada 2 lunas llenas, toda la noche: <b>monstruos más fuertes y rápidos</b>. Además hay Luna de Sangre, de Cosecha y Azul.</p></div>
+      <div class="card"><h3>Dificultad que sube</h3><p>Cada día los monstruos salen <b>mejor armados y con más vida</b>. Algunos son <b>élites con poderes</b>.</p></div>
+      <div class="card"><h3>Nether y End brutales</h3><p>Nether: monstruos con <b>×1.5 vida y daño</b>. End: <b>×2 vida, ×1.75 daño</b>. Biomas y estructuras nuevas en los dos.</p></div>
+      <div class="card"><h3>Jefes nuevos</h3><p><b>Ignis, Netherite Monstrosity, Ender Guardian, Leviatán, Frostmaw, Wroughtnaut, Umvuthi</b> y más.</p></div>
+      <div class="card"><h3>Estructuras</h3><p>Mazmorras, fortalezas, minas y templos rediseñados, tabernas y ruinas nuevas para explorar y lootear.</p></div>
+      <div class="card"><h3>Alertas en el chat</h3><p>Aviso a todos cuando alguien queda con <b>3 corazones o menos</b> o usa un <b>tótem</b>, con sus coordenadas.</p></div>
+      <div class="card wide"><h3>Ayudas</h3><p><b>Mochilas, minimapa y mapa del mundo, recetas (JEI)</b>, info de bloques y mobs, y <b>chat de voz por proximidad</b>.</p></div>
+    </div>
+  </section>
+
+  <section class="sec viene">
+    <div class="sec-h"><span class="tag">EN CAMINO</span><p>Ideas en la mesa: pueden cambiar con su feedback</p></div>
+    <div class="grid">
+      <div class="card"><h3>Jefes que endurecen el mundo</h3><p>Cada jefe derrotado por primera vez <b>sube la dificultad de todo el server</b>.</p></div>
+      <div class="card"><h3>El End se gana</h3><p>Para craftear Ojos de Ender hay que haber vencido a un <b>jefe del Nether</b>.</p></div>
+      <div class="card"><h3>Nether en llamas</h3><p>Fuego y lava hacen <b>el doble de daño</b> en el Nether.</p></div>
+      <div class="card"><h3>Revivir caro</h3><p>Otra forma de revivir: un tótem crafteado con <b>netherite, lágrima de ghast y fragmento de eco</b> + altar.</p></div>
+      <div class="card wide"><h3>Misiones</h3><p>Un libro de misiones que guía la partida: <b>Sobrevivir → Nether → Wither → Profundidades → End → Dragón</b>, con recompensas.</p></div>
+    </div>
+  </section>
+
+  <section class="sec tu">
+    <div class="sec-h"><span class="tag">TU TURNO</span><p>Queremos saber</p></div>
+    <div class="ask">
+      <div>¿Muy difícil o muy fácil?</div>
+      <div>¿Qué premio meterías al casino?</div>
+      <div>¿Qué Evento del Caos inventarías?</div>
+      <div>¿Qué de “En camino” sí o no?</div>
+    </div>
+    <div class="cta">Escribe tus ideas en el grupo o <b>díselas al admin</b>. Todo se puede ajustar.</div>
+  </section>
+</div>
+</body>
+</html>

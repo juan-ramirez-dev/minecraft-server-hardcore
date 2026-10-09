@@ -27,7 +27,7 @@ client-only.txt            Jars que NO van al server
 scripts/                   start/launch/console/cmd, sync-mods, fetch-mods, build-mrpack, gen-hub, backup, playit
 patches/                   Parche local para el agente de playit v1.0.10
 dist/LEEME-amigos.txt      Instrucciones para los jugadores
-dist/banner/               Banner de instalación (PNG para compartir + HTML fuente)
+dist/banner/               Banners para jugadores: instalación y roadmap (PNG + HTML fuente)
 ```
 
 No se versionan: mundos, backups, JDK, librerías de Forge, jars de mods ni datos de jugadores (whitelist, ops).

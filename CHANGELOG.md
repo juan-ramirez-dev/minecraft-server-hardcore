@@ -120,3 +120,4 @@ Backup del mundo v1.0: `backups/world-v1.0-20261007-224531/` (+ .tar.gz). Mundo 
 - Plantilla `casino-v1.1.0` (6.9 MB): mundo v1.1.0 con hub + casino en 0 70 416 y gamerules listas, sin jugadores.
   Verificado: guardar → restaurar deja el mundo idéntico.
 - `dist/banner/banner-instalacion.png` (+ .html fuente): instalación con Modrinth App o launcher oficial + IP del server.
+- `dist/banner/banner-roadmap.png` (+ .html): qué hay en el server, qué viene (plan pendiente) y preguntas de feedback.
