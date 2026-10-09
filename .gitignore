@@ -33,3 +33,6 @@ dist/*.zip
 server/installer.log
 server/config/spark/tmp/
 server/config/spark/activity.json
+
+# Plantillas de mundo (scripts/plantilla.sh)
+plantillas/

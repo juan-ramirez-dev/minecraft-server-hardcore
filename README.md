@@ -27,6 +27,7 @@ client-only.txt            Jars que NO van al server
 scripts/                   start/launch/console/cmd, sync-mods, fetch-mods, build-mrpack, gen-hub, backup, playit
 patches/                   Parche local para el agente de playit v1.0.10
 dist/LEEME-amigos.txt      Instrucciones para los jugadores
+dist/banner/               Banner de instalación (PNG para compartir + HTML fuente)
 ```
 
 No se versionan: mundos, backups, JDK, librerías de Forge, jars de mods ni datos de jugadores (whitelist, ops).
@@ -40,6 +41,9 @@ No se versionan: mundos, backups, JDK, librerías de Forge, jars de mods ni dato
 4. `eula=true` en `server/eula.txt` (solo si aceptas el EULA de Minecraft).
 5. Arrancar: `scripts/launch-detached.sh` (tmux `mc-hardcore`). Consola: `scripts/console.sh`. Comando suelto: `scripts/cmd.sh "list"`.
 6. Primera vez en un mundo nuevo (como op): `/hub construir`, `/op <admin>`, `/whitelist add <jugador>`, y las gamerules del CHANGELOG.
+
+Reiniciar el mundo de prueba (server apagado): `scripts/plantilla.sh restaurar` → vuelve a la plantilla `casino-v1.1.0`
+(hub + casino listos, sin jugadores). Guardar otra: `scripts/plantilla.sh guardar <nombre>`.
 
 Pack para jugadores: `python3 scripts/build-mrpack.py 1.1.0` → `dist/Hardcore-Coop-1.1.0.mrpack` (+ zip de mods).
 

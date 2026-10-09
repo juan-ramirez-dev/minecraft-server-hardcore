@@ -113,3 +113,10 @@ Backup del mundo v1.0: `backups/world-v1.0-20261007-224531/` (+ .tar.gz). Mundo 
 - `player_alerts.js`: aviso a todos cuando un jugador queda con ≤ 3 ❤ (se rearma al pasar de 5 ❤) y cuando usa un Tótem de la
   Inmortalidad (objetivo `hc_totem`, estadística `minecraft.used:minecraft.totem_of_undying`). Incluye coordenadas y dimensión.
 - Verificado: carga sin errores en arranque de prueba. Sin probar con un jugador real.
+
+## 2026-10-09 — Plantilla de mundo + banner de instalación
+- `scripts/plantilla.sh lista|guardar <nombre>|restaurar [nombre]`: guarda/restaura el mundo (sin datos de jugadores).
+  Restaurar respalda antes el mundo actual en `backups/antes-de-reset-*`. Plantillas en `plantillas/` (no se versiona).
+- Plantilla `casino-v1.1.0` (6.9 MB): mundo v1.1.0 con hub + casino en 0 70 416 y gamerules listas, sin jugadores.
+  Verificado: guardar → restaurar deja el mundo idéntico.
+- `dist/banner/banner-instalacion.png` (+ .html fuente): instalación con Modrinth App o launcher oficial + IP del server.

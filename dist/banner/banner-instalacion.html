@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Hardcore Co-op — Cómo entrar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0a0b;
+    --panel: #171213;
+    --line: #2e2224;
+    --red: #e0262f;
+    --red-dim: #7a1218;
+    --gold: #f5c542;
+    --green: #1bd96a;
+    --text: #efe7e4;
+    --muted: #a8999a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 1080px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 22px;
+    line-height: 1.45;
+  }
+  .wrap {
+    padding: 64px 60px 56px;
+    background:
+      radial-gradient(900px 420px at 50% -80px, rgba(224, 38, 47, .28), transparent 70%),
+      repeating-linear-gradient(0deg, transparent 0 39px, rgba(255,255,255,.018) 39px 40px),
+      repeating-linear-gradient(90deg, transparent 0 39px, rgba(255,255,255,.018) 39px 40px);
+  }
+  .hearts { display: flex; gap: 10px; justify-content: center; margin-bottom: 28px; }
+  .heart { width: 36px; height: 32px; }
+  h1 {
+    font-family: "Press Start 2P", monospace;
+    font-size: 54px;
+    text-align: center;
+    letter-spacing: 2px;
+    line-height: 1.25;
+    color: var(--text);
+    text-shadow: 5px 5px 0 var(--red-dim);
+  }
+  .tagline { text-align: center; color: var(--muted); margin-top: 18px; font-size: 22px; }
+  .tagline b { color: var(--red); font-weight: 800; }
+  .chips { display: flex; gap: 12px; justify-content: center; margin-top: 22px; flex-wrap: wrap; }
+  .chip {
+    border: 2px solid var(--line); background: var(--panel);
+    padding: 8px 16px; font-weight: 600; font-size: 19px; color: var(--text);
+  }
+
+  .server {
+    margin: 40px 0 0;
+    border: 3px solid var(--red);
+    background: linear-gradient(180deg, rgba(224,38,47,.14), rgba(224,38,47,.04));
+    padding: 26px 30px;
+    text-align: center;
+  }
+  .server .label { font-family: "Press Start 2P", monospace; font-size: 15px; color: var(--red); letter-spacing: 1px; }
+  .server .addr { font-family: "JetBrains Mono", monospace; font-weight: 700; font-size: 46px; margin-top: 14px; color: #fff; }
+
+  .need { margin-top: 26px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .need div { background: var(--panel); border: 2px solid var(--line); padding: 14px 16px; font-size: 18px; color: var(--muted); }
+  .need b { display: block; color: var(--text); font-size: 20px; margin-bottom: 2px; }
+
+  .opt { margin-top: 34px; border: 2px solid var(--line); background: var(--panel); }
+  .opt header { display: flex; align-items: center; gap: 18px; padding: 22px 28px; border-bottom: 2px solid var(--line); }
+  .opt .tag {
+    font-family: "Press Start 2P", monospace; font-size: 22px;
+    width: 58px; height: 58px; display: grid; place-items: center; flex: none;
+    color: #0d0a0b;
+  }
+  .opt.a .tag { background: var(--green); }
+  .opt.b .tag { background: var(--gold); }
+  .opt h2 { font-size: 30px; font-weight: 800; line-height: 1.15; }
+  .opt h2 small { display: block; font-size: 18px; font-weight: 600; color: var(--muted); margin-top: 4px; }
+  .opt .file {
+    margin-left: auto; font-family: "JetBrains Mono", monospace; font-size: 16px; font-weight: 600;
+    border: 2px dashed var(--line); padding: 8px 12px; color: var(--text); white-space: nowrap;
+  }
+  ol { list-style: none; counter-reset: s; padding: 10px 28px 22px; }
+  li { counter-increment: s; position: relative; padding: 14px 0 14px 56px; border-bottom: 1px solid var(--line); }
+  li:last-child { border-bottom: 0; }
+  li::before {
+    content: counter(s);
+    position: absolute; left: 0; top: 13px;
+    width: 38px; height: 38px; display: grid; place-items: center;
+    font-family: "Press Start 2P", monospace; font-size: 15px;
+    border: 2px solid var(--line); color: var(--text);
+  }
+  .opt.a li::before { border-color: var(--green); color: var(--green); }
+  .opt.b li::before { border-color: var(--gold); color: var(--gold); }
+  code {
+    font-family: "JetBrains Mono", monospace; font-size: 18px; font-weight: 600;
+    background: #0d0a0b; border: 1px solid var(--line); padding: 1px 7px; color: #fff;
+  }
+  li b { color: #fff; }
+  .path { display: block; margin-top: 6px; font-size: 18px; color: var(--muted); }
+  .path code { font-size: 17px; }
+  .tip { padding: 0 28px 24px; color: var(--muted); font-size: 18px; }
+  .tip b { color: var(--text); }
+
+  .foot { margin-top: 32px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .foot div { border-left: 4px solid var(--red); background: var(--panel); padding: 16px 20px; font-size: 18px; color: var(--muted); }
+  .foot b { color: var(--text); display: block; margin-bottom: 2px; font-size: 19px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hearts">
+    <!-- corazones hardcore (pixel) -->
+    <svg class="heart" viewBox="0 0 9 8" shape-rendering="crispEdges"><path fill="#7a1218" d="M1 0h2v1h1v1h1V1h1V0h2v1h1v3H8v1H7v1H6v1H5v1H4V7H3V6H2V5H1V4H0V1h1z"/><path fill="#e0262f" d="M1 1h2v1h1v1h1V2h1V1h2v3H7v1H6v1H5v1H4V6H3V5H2V4H1z"/><path fill="#fff" d="M2 2h1v1H2z"/></svg>
+    <svg class="heart" viewBox="0 0 9 8" shape-rendering="crispEdges"><path fill="#7a1218" d="M1 0h2v1h1v1h1V1h1V0h2v1h1v3H8v1H7v1H6v1H5v1H4V7H3V6H2V5H1V4H0V1h1z"/><path fill="#e0262f" d="M1 1h2v1h1v1h1V2h1V1h2v3H7v1H6v1H5v1H4V6H3V5H2V4H1z"/><path fill="#fff" d="M2 2h1v1H2z"/></svg>
+    <svg class="heart" viewBox="0 0 9 8" shape-rendering="crispEdges"><path fill="#7a1218" d="M1 0h2v1h1v1h1V1h1V0h2v1h1v3H8v1H7v1H6v1H5v1H4V7H3V6H2V5H1V4H0V1h1z"/><path fill="#e0262f" d="M1 1h2v1h1v1h1V2h1V1h2v3H7v1H6v1H5v1H4V6H3V5H2V4H1z"/><path fill="#fff" d="M2 2h1v1H2z"/></svg>
+  </div>
+  <h1>HARDCORE<br>CO-OP</h1>
+  <p class="tagline">Aquí se muere <b>de verdad</b>. Cómo instalar el modpack y entrar al server.</p>
+  <div class="chips">
+    <span class="chip">Minecraft Java 1.20.1</span>
+    <span class="chip">Forge 47.4.26</span>
+    <span class="chip">Pack v1.1.0</span>
+  </div>
+
+  <div class="server">
+    <div class="label">IP DEL SERVER</div>
+    <div class="addr">fried-wheat.tun.ply.gg</div>
+  </div>
+
+  <div class="need">
+    <div><b>Minecraft original</b>cuenta Java (premium)</div>
+    <div><b>Estar en la whitelist</b>pásale tu usuario al admin</div>
+    <div><b>El archivo del pack</b>te lo pasa el admin</div>
+  </div>
+
+  <section class="opt a">
+    <header>
+      <div class="tag">A</div>
+      <h2>Con Modrinth App<small>Recomendado: instala todo solo</small></h2>
+      <span class="file">Hardcore-Coop-1.1.0.mrpack</span>
+    </header>
+    <ol>
+      <li>Descarga e instala la Modrinth App: <code>modrinth.com/app</code></li>
+      <li>Arrastra el <b>.mrpack</b> a la app (o <b>+</b> → <b>Import from file</b>). Espera a que baje los mods.</li>
+      <li>En la instancia: <b>Settings → Java and memory</b> → sube la RAM a <b>6–8 GB</b>.</li>
+      <li><b>Play → Multijugador → Agregar servidor</b> → pega la dirección de arriba.</li>
+    </ol>
+  </section>
+
+  <section class="opt b">
+    <header>
+      <div class="tag">B</div>
+      <h2>Sin Modrinth<small>Launcher oficial de Minecraft</small></h2>
+      <span class="file">Hardcore-Coop-1.1.0-mods.zip</span>
+    </header>
+    <ol>
+      <li>Descarga el instalador de <b>Forge 1.20.1 – 47.4.26</b> en <code>files.minecraftforge.net</code>, ábrelo y elige <b>Install client</b>.</li>
+      <li>Abre el launcher, juega una vez con el perfil <b>forge</b> para que cree las carpetas y ciérralo.</li>
+      <li>Descomprime el zip y copia los <b>.jar</b> de su carpeta <code>mods</code> en:
+        <span class="path">Windows: <code>%appdata%\.minecraft\mods</code></span>
+        <span class="path">Mac: <code>~/Library/Application Support/minecraft/mods</code></span>
+      </li>
+      <li><b>Instalaciones → forge → Más opciones</b> → en argumentos JVM cambia <code>-Xmx2G</code> por <code>-Xmx6G</code>.</li>
+      <li><b>Multijugador → Agregar servidor</b> → pega la dirección de arriba.</li>
+    </ol>
+    <p class="tip"><b>Atajo:</b> Prism Launcher también abre el <b>.mrpack</b> directo (igual que la opción A).</p>
+  </section>
+
+  <div class="foot">
+    <div><b>¿Tenías la v1.0.0?</b>Borra la instancia o los mods viejos e instala de cero.</div>
+    <div><b>¿No te deja entrar?</b>Misma versión exacta de Forge y no agregues otros mods.</div>
+  </div>
+</div>
+</body>
+</html>
