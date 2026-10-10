@@ -3,7 +3,9 @@
 //   preferentemente dentro de una Ciudad Antigua (guarida del Warden) lejos de los vivos. Dura 45 min.
 // - Las coordenadas salen en el chat y en una bossbar con cuenta regresiva.
 // - Uso: renombrar el Corazón en un yunque con el nombre exacto del muerto y hacer clic derecho → revive a tu lado.
-// Admin: /alma forzar | /alma estado | /alma cancelar | /alma dar <jugador>
+// - Además, cada 2–3 h de juego (con alguien vivo conectado) aparece un Cofre del Alma "de reserva" aunque nadie haya muerto,
+//   dentro de una estructura peligrosa y, si tiene, junto a un spawner. Su Corazón se puede guardar para la próxima muerte.
+// Admin: /alma forzar | /alma reserva | /alma estado | /alma cancelar | /alma dar <jugador>
 // Nota Rhino: dentro de funciones se usa `var`.
 
 const $AlmaRegistries = Java.loadClass('net.minecraft.core.registries.Registries')
@@ -17,6 +19,22 @@ const ALMA_DELAY_MIN = 20 * 60 * 20
 const ALMA_DELAY_MAX = 40 * 60 * 20
 const ALMA_DURATION = 45 * 60 * 20
 const ALMA_RETRY = 60 * 60 * 20
+const ALMA_FREE_MIN = 2 * 60 * 60 * 20   // cofre de reserva: cada 2–3 h de juego
+const ALMA_FREE_MAX = 3 * 60 * 60 * 20
+// Estructuras peligrosas del Overworld (muchos mobs o spawners) donde puede aparecer el cofre de reserva
+const ALMA_HARD = {
+  'betterdungeons:skeleton_dungeon': 'una mazmorra de esqueletos', 'betterdungeons:zombie_dungeon': 'una mazmorra de zombis',
+  'betterdungeons:spider_dungeon': 'una mazmorra de arañas', 'betterstrongholds:stronghold': 'una fortaleza del End',
+  'minecraft:mansion': 'una mansión del bosque', 'nova_structures:undead_crypt': 'una cripta de no-muertos',
+  'nova_structures:creeping_crypt': 'una cripta rastrera', 'nova_structures:illager_manor': 'una mansión illager',
+  'nova_structures:illager_hideout': 'un escondite illager', 'nova_structures:donjon': 'un torreón',
+  'nova_structures:stray_fort': 'un fuerte de esqueletos glaciales', 'nova_structures:bunker': 'un búnker',
+  'born_in_chaos_v1:dark_tower_forest': 'una torre oscura', 'born_in_chaos_v1:dark_tower_plain': 'una torre oscura',
+  'born_in_chaos_v1:dark_tower_taiga': 'una torre oscura', 'explorify:mausoleum': 'un mausoleo',
+  'explorify:black_spiral': 'la espiral negra', 'mowziesmobs:wrought_chamber': 'la cámara del Wroughtnaut',
+  'cataclysm:frosted_prison': 'la prisión helada (Maledictus)', 'cataclysm:cursed_pyramid': 'la pirámide maldita',
+  'cataclysm:ancient_factory': 'la fábrica antigua (Harbinger)'
+}
 const ALMA_BAR = 'alma:cofre'
 const ALMA_NAME = 'Corazón del Alma'
 const ALMA_ITEM_NBT = '{SoulHeart:1b,display:{Name:\'{"text":"Corazón del Alma","color":"light_purple","italic":false}\',' +
@@ -89,6 +107,52 @@ function almaFloorSpot(level, cx, cz, yMin, yMax, radius) {
   return null
 }
 
+// Estructura peligrosa cercana a (x, z): devuelve { box, spawners, name } o null
+function almaFindHardStructure(level, x, z) {
+  var ids = Object.keys(ALMA_HARD)
+  var id = ids[Math.floor(Math.random() * ids.length)]
+  try {
+    var reg = level.registryAccess().registryOrThrow($AlmaRegistries.STRUCTURE)
+    var holder = reg.getHolderOrThrow($AlmaResourceKey.create($AlmaRegistries.STRUCTURE, new $AlmaRL(id)))
+    var pair = level.getChunkSource().getGenerator().findNearestMapStructure(level, $AlmaHolderSet.direct($AlmaList.of(holder)), new $AlmaBlockPos(Math.floor(x), 0, Math.floor(z)), 50, false)
+    if (!pair) return null
+    var pos = pair.getFirst()
+    var start = level.getChunk(pos.x >> 4, pos.z >> 4).getStartForStructure(holder.value())
+    if (!start || !start.isValid()) return null
+    var box = start.getBoundingBox()
+    var b = { minX: box.minX(), minY: box.minY(), minZ: box.minZ(), maxX: box.maxX(), maxY: box.maxY(), maxZ: box.maxZ() }
+    // spawners dentro de la estructura (máx. 81 chunks)
+    var spawners = []
+    var c0x = b.minX >> 4, c1x = b.maxX >> 4, c0z = b.minZ >> 4, c1z = b.maxZ >> 4
+    if ((c1x - c0x + 1) * (c1z - c0z + 1) <= 81) {
+      for (var cx = c0x; cx <= c1x; cx++) for (var cz = c0z; cz <= c1z; cz++) {
+        var it = level.getChunk(cx, cz).getBlockEntities().values().iterator()
+        while (it.hasNext()) {
+          var bp = it.next().getBlockPos()
+          if (String(level.getBlock(bp).id) == 'minecraft:spawner') {
+            if (bp.x >= b.minX && bp.x <= b.maxX && bp.z >= b.minZ && bp.z <= b.maxZ) spawners.push([bp.x, bp.y, bp.z])
+          }
+        }
+      }
+    }
+    return { box: b, spawners: spawners, name: ALMA_HARD[id], id: id }
+  } catch (err) {
+    console.error('Cofre del Alma: no se pudo buscar ' + id + ' (' + x + ', ' + z + '): ' + err)
+    return null
+  }
+}
+
+// Sitio para el cofre dentro de una estructura: junto a un spawner si hay, si no en su interior
+function almaHardSpot(level, s) {
+  for (var i = 0; i < s.spawners.length && i < 6; i++) {
+    var sp = s.spawners[Math.floor(Math.random() * s.spawners.length)]
+    var spot = almaFloorSpot(level, sp[0], sp[2], sp[1] - 2, sp[1] + 2, 6)
+    if (spot) return spot
+  }
+  var b = s.box
+  return almaFloorSpot(level, (b.minX + b.maxX) / 2, (b.minZ + b.maxZ) / 2, b.minY + 1, b.maxY - 1, Math.min(24, Math.max(6, (b.maxX - b.minX) / 2)))
+}
+
 // Plan B: cámara profunda con spawners en un punto lejano
 function almaBuildVault(server, x, z) {
   var y = -40
@@ -96,15 +160,27 @@ function almaBuildVault(server, x, z) {
   almaCmd(server, `${d}fill ${x - 3} ${y - 1} ${z - 3} ${x + 3} ${y + 4} ${z + 3} minecraft:deepslate_bricks hollow`)
   almaCmd(server, `${d}setblock ${x - 2} ${y} ${z - 2} minecraft:spawner{SpawnData:{entity:{id:"minecraft:zombie"}},Delay:20s,SpawnCount:2s,RequiredPlayerRange:24s}`)
   almaCmd(server, `${d}setblock ${x + 2} ${y} ${z + 2} minecraft:spawner{SpawnData:{entity:{id:"minecraft:skeleton"}},Delay:20s,SpawnCount:2s,RequiredPlayerRange:24s}`)
+  almaCmd(server, `${d}setblock ${x - 2} ${y} ${z + 2} minecraft:spawner{SpawnData:{entity:{id:"minecraft:spider"}},Delay:20s,SpawnCount:2s,RequiredPlayerRange:24s}`)
+  almaCmd(server, `${d}setblock ${x + 2} ${y} ${z - 2} minecraft:spawner{SpawnData:{entity:{id:"minecraft:cave_spider"}},Delay:20s,SpawnCount:3s,RequiredPlayerRange:24s}`)
   almaCmd(server, `${d}setblock ${x} ${y + 3} ${z} minecraft:soul_lantern[hanging=true]`)
   return [x, y, z]
 }
 
-function almaSpawnChest(server) {
+function almaSpawnChest(server, reserva) {
   var level = server.overworld()
   var c = almaCenter(server)
   var spot = null, where = ''
-  for (var i = 0; i < 4 && !spot; i++) {
+  for (var j = 0; reserva && j < 6 && !spot; j++) {
+    var a0 = Math.random() * 6.283185307179586, d0 = almaRand(600, 1800)
+    var hs = almaFindHardStructure(level, c[0] + Math.cos(a0) * d0, c[1] + Math.sin(a0) * d0)
+    if (!hs) continue
+    var hx = (hs.box.minX + hs.box.maxX) / 2, hz = (hs.box.minZ + hs.box.maxZ) / 2
+    var hd = Math.sqrt(Math.pow(hx - c[0], 2) + Math.pow(hz - c[1], 2))
+    if (hd < 400 || hd > 2500) continue
+    spot = almaHardSpot(level, hs)
+    if (spot) where = 'en ' + hs.name + (hs.spawners.length ? ` (${hs.spawners.length} spawners)` : '')
+  }
+  for (var i = 0; !reserva && i < 4 && !spot; i++) {
     var a = Math.random() * 6.283185307179586, d = almaRand(800, 1600)
     var city = almaFindAncientCity(level, c[0] + Math.cos(a) * d, c[1] + Math.sin(a) * d)
     if (!city) continue
@@ -128,6 +204,7 @@ function almaSpawnChest(server) {
   st.pos = spot
   st.end = now + ALMA_DURATION
   st.where = where
+  st.reserva = !!reserva
   almaSave(server, st)
 
   almaCmd(server, `bossbar remove ${ALMA_BAR}`)
@@ -143,7 +220,9 @@ function almaSpawnChest(server) {
   almaTell(server, '@a', [
     { text: 'Apareció un Cofre del Alma ' + where + ' en ', color: 'white' },
     { text: `X ${spot[0]}  Y ${spot[1]}  Z ${spot[2]}`, color: 'gold', bold: true },
-    { text: ` (Overworld). Desaparece en ${ALMA_DURATION / 1200} min. Dentro hay un Corazón del Alma para revivir a un muerto.`, color: 'white' }
+    { text: ` (Overworld). Desaparece en ${ALMA_DURATION / 1200} min. ` + (reserva
+      ? 'Nadie ha muerto: su Corazón del Alma se puede guardar para la próxima muerte.'
+      : 'Dentro hay un Corazón del Alma para revivir a un muerto.'), color: 'white' }
   ])
 }
 
@@ -208,7 +287,19 @@ ServerEvents.tick(e => {
   }
   var alive = 0
   server.players.forEach(p => { if (!p.isSpectator()) alive++ })
-  if (st.dead.length && st.next && now >= st.next && alive > 0) almaSpawnChest(server)
+  if (st.dead.length && st.next && now >= st.next && alive > 0) { almaSpawnChest(server, false); return }
+  // Cofre de reserva: cuenta solo el tiempo con alguien vivo conectado
+  if (alive > 0) {
+    st.play = (st.play || 0) + 20
+    if (!st.nextFree) st.nextFree = st.play + almaRand(ALMA_FREE_MIN, ALMA_FREE_MAX)
+    if (st.play >= st.nextFree) {
+      st.nextFree = st.play + almaRand(ALMA_FREE_MIN, ALMA_FREE_MAX)
+      almaSave(server, st)
+      almaSpawnChest(server, true)
+      return
+    }
+    almaSave(server, st)
+  }
 })
 
 // Alguien tomó el Corazón → se anuncia y termina la cuenta regresiva
@@ -262,7 +353,8 @@ PlayerEvents.loggedIn(e => {
 ServerEvents.commandRegistry(event => {
   var Commands = event.commands, Arguments = event.arguments
   event.register(Commands.literal('alma').requires(s => s.hasPermission(2))
-    .then(Commands.literal('forzar').executes(ctx => { almaSpawnChest(ctx.source.server); return 1 }))
+    .then(Commands.literal('forzar').executes(ctx => { almaSpawnChest(ctx.source.server, false); return 1 }))
+    .then(Commands.literal('reserva').executes(ctx => { almaSpawnChest(ctx.source.server, true); return 1 }))
     .then(Commands.literal('cancelar').executes(ctx => {
       var st = almaState(ctx.source.server)
       if (st.active) almaFinish(ctx.source.server, st, 'expired')
@@ -275,7 +367,7 @@ ServerEvents.commandRegistry(event => {
     })))
     .then(Commands.literal('estado').executes(ctx => {
       var server = ctx.source.server, st = almaState(server), now = almaNow(server)
-      ctx.source.sendSystemMessage(Text.yellow(`Muertos: ${st.dead.join(', ') || '-'} | cofre activo: ${st.active ? st.pos.join(' ') + ' (' + Math.ceil((st.end - now) / 20) + ' s)' : 'no'} | próximo: ${st.next ? Math.max(0, Math.ceil((st.next - now) / 20)) + ' s' : '-'}`))
+      ctx.source.sendSystemMessage(Text.yellow(`Muertos: ${st.dead.join(', ') || '-'} | cofre activo: ${st.active ? st.pos.join(' ') + ' ' + (st.where || '') + (st.reserva ? ' [reserva]' : '') + ' (' + Math.ceil((st.end - now) / 20) + ' s)' : 'no'} | próximo: ${st.next ? Math.max(0, Math.ceil((st.next - now) / 20)) + ' s' : '-'} | reserva en: ${st.nextFree ? Math.max(0, Math.ceil((st.nextFree - (st.play || 0)) / 1200)) + ' min de juego' : '-'}`))
       return 1
     })))
 })

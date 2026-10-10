@@ -55,7 +55,7 @@ Pack para jugadores: `python3 scripts/build-mrpack.py 1.1.0` → `dist/Hardcore-
 | `/hub altura <x> <z> <radio> <paso>` · `/hub volcar <x> <z> <radio>` | Exporta relieve/biomas o bloques de superficie a `kubejs/exported/` |
 | `/casino validar` · `/casino prueba <n>` | Verifica ítems/tablas de loot · simula tiradas |
 | `/caos iniciar <evento>` · `/caos parar` · `/caos estado` · `/caos activar\|desactivar` | Eventos del Caos |
-| `/alma forzar` · `/alma estado` · `/alma cancelar` · `/alma dar <jugador>` | Cofre del Alma |
+| `/alma forzar` · `/alma reserva` · `/alma estado` · `/alma cancelar` · `/alma dar <jugador>` | Cofre del Alma (`reserva`: el periódico, sin muertos) |
 | `/tag <jugador> add espectador_libre` | Libera a un admin del espectador restringido |
 
 ## Notas

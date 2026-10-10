@@ -154,3 +154,12 @@ Backup del mundo v1.0: `backups/world-v1.0-20261007-224531/` (+ .tar.gz). Mundo 
 - La clave del agente había caducado (InvalidAgentKey desde el 2026-10-08). Agente nuevo vinculado con `playit-cli setup`
   y los túneles viejos reasignados en el panel: misma dirección `fried-wheat.tun.ply.gg` y `fried-chat.tun.ply.gg:29525`.
 - Verificado: ping de estado de Minecraft por el túnel público OK (1.20.1, MOTD correcto).
+
+## 2026-10-10 — Cofre del Alma de reserva + whitelist
+- `soul_chest.js`: cada 2–3 h de juego (solo cuenta con alguien vivo conectado) aparece un Cofre del Alma aunque nadie haya
+  muerto. Va en una estructura peligrosa del Overworld (mazmorras de YUNG, fortaleza, mansión, criptas, torres oscuras,
+  mausoleo, cámara del Wroughtnaut, prisión helada, pirámide maldita, fábrica antigua…) y junto a un spawner si la
+  estructura tiene. El Corazón se puede guardar para la próxima muerte. Plan B (cámara profunda): ahora 4 spawners.
+  `/alma reserva` lo fuerza; `/alma estado` muestra estructura y minutos de juego para el próximo.
+- Verificado: `/alma reserva` → cofre en un mausoleo con 1 spawner (`811 64 1179`); cancelado tras la prueba.
+- Whitelist: + elCocoJo.
