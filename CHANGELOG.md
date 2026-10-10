@@ -149,3 +149,8 @@ Backup del mundo v1.0: `backups/world-v1.0-20261007-224531/` (+ .tar.gz). Mundo 
 - Verificado en el server: 15/15 bloques clave, `/casino validar` OK, vistas aéreas renderizadas del volcado.
 - Plantilla: `montana-v2`. El hub anterior (`0 70 416`) se quitó moviendo `r.-1.0` y `r.0.0` (region, entities, poi)
   a `backups/regiones-hub-viejo-20261010/`; esa zona se regenera natural con la misma semilla (verificado).
+
+## 2026-10-10 — playit re-vinculado
+- La clave del agente había caducado (InvalidAgentKey desde el 2026-10-08). Agente nuevo vinculado con `playit-cli setup`
+  y los túneles viejos reasignados en el panel: misma dirección `fried-wheat.tun.ply.gg` y `fried-chat.tun.ply.gg:29525`.
+- Verificado: ping de estado de Minecraft por el túnel público OK (1.20.1, MOTD correcto).
