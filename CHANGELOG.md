@@ -147,4 +147,5 @@ Backup del mundo v1.0: `backups/world-v1.0-20261007-224531/` (+ .tar.gz). Mundo 
 - `hub_core.js`: `/hub construir` fuerza la carga de los chunks de la obra antes de construir (lejos del spawn fallaba).
   Nuevos `/hub altura <x> <z> <radio> <paso>` y `/hub volcar <x> <z> <radio>` → `kubejs/exported/` (relieve/superficie).
 - Verificado en el server: 15/15 bloques clave, `/casino validar` OK, vistas aéreas renderizadas del volcado.
-- Plantilla: `montana-v1`. El hub anterior (`0 70 416`) sigue en el mundo: pendiente decidir cómo quitarlo.
+- Plantilla: `montana-v2`. El hub anterior (`0 70 416`) se quitó moviendo `r.-1.0` y `r.0.0` (region, entities, poi)
+  a `backups/regiones-hub-viejo-20261010/`; esa zona se regenera natural con la misma semilla (verificado).
