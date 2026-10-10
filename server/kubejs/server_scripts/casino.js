@@ -194,10 +194,11 @@ BlockEvents.rightClicked(e => {
   if (!global.inHub(e.level, b.x, b.z)) return
   var kind = machineAt(b.x, b.y, b.z)
   if (!kind) return
-  e.cancel()
-  if (String(e.hand) != 'MAIN_HAND' || e.player.isSpectator()) return
-  if (kind == 'slot') spinSlot(e.server, e.player)
-  else openDestino(e.server, e.player)
+  if (String(e.hand) == 'MAIN_HAND' && !e.player.isSpectator()) {
+    if (kind == 'slot') spinSlot(e.server, e.player)
+    else openDestino(e.server, e.player)
+  }
+  e.cancel()   // en KubeJS 6 cancel() termina el handler: va al final
 })
 
 // Prueba de distribución: /casino prueba <n>  (solo cuenta, no entrega nada)

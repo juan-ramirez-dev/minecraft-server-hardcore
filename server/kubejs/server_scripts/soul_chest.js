@@ -327,7 +327,11 @@ PlayerEvents.inventoryChanged(e => {
 // Usar el Corazón renombrado → revive al muerto a tu lado
 ItemEvents.rightClicked(e => {
   if (!almaIsSoulHeart(e.item)) return
-  e.cancel()
+  almaUseHeart(e)
+  e.cancel()   // en KubeJS 6 cancel() termina el handler: va al final
+})
+
+function almaUseHeart(e) {
   if (String(e.hand) != 'MAIN_HAND') return
   var server = e.server, p = e.player
   var target = String(e.item.hoverName.string).trim()
@@ -354,7 +358,7 @@ ItemEvents.rightClicked(e => {
   var st = almaState(server)
   var i = st.dead.indexOf(target)
   if (i >= 0) { st.dead.splice(i, 1); almaSave(server, st) }
-})
+}
 
 PlayerEvents.loggedIn(e => {
   var st = almaState(e.server)

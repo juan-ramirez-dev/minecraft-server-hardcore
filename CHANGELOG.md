@@ -170,3 +170,9 @@ Backup del mundo v1.0: `backups/world-v1.0-20261007-224531/` (+ .tar.gz). Mundo 
   Los Corazones ya existentes siguen funcionando. `/alma dar` entrega un Reviver.
 - Verificado: `/alma reserva` → mazmorra de zombis con 21 spawners, cofre con el Reviver; cancelado tras la prueba.
 - `dist/LEEME-amigos.txt` actualizado.
+
+## 2026-10-10 — Fix: el casino no cobraba ni giraba
+- Causa: en KubeJS 6 `e.cancel()` termina el handler; `casino.js` lo llamaba antes de `spinSlot`/`openDestino`, y
+  `soul_chest.js` antes de usar el Corazón del Alma. Ahora la lógica va primero y `cancel()` al final.
+- Diagnóstico con registro temporal de clics (ya quitado): los clics en palanca/pantalla sí se detectaban.
+- Regla para scripts nuevos: nunca poner código después de `e.cancel()`.
