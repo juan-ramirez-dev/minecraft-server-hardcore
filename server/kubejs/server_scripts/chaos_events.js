@@ -2,6 +2,7 @@
 // - Aleatorios: cada ~20 min de juego (con jugadores vivos conectados) hay probabilidad de que empiece uno.
 // - Furia de la Luna: fija, cada 2 lunas llenas, dura toda la noche.
 // - Nunca afectan la zona segura del spawn/casino.
+// - Dependen de la fase de progresión (progression.js): ninguno en la fase 0, suaves en la 1 (a mitad de probabilidad), todos desde la 2.
 // Admin: /caos iniciar <evento> | /caos parar | /caos estado | /caos activar | /caos desactivar
 // Nota Rhino: dentro de funciones se usa `var` (let/const no se reinicializan bien dentro de bucles).
 
@@ -87,7 +88,7 @@ function caosSummon(server, p, type, spot) {
 // pulse(server, st): se llama cada `every` ticks
 const CAOS_EVENTS = {
   tormenta: {
-    name: 'Tormenta Eléctrica', desc: 'Todos los creepers están cargados', color: 'yellow', weight: 3, dur: 10 * 60 * 20,
+    name: 'Tormenta Eléctrica', desc: 'Todos los creepers están cargados', color: 'yellow', weight: 3, fase: 1, dur: 10 * 60 * 20,
     start: (server, st) => caosCmd(server, `weather thunder ${Math.ceil(st.dur / 20) + 30}`),
     onMob: (m) => { if (String(m.type) == 'minecraft:creeper') { m.mergeNbt({ powered: true }); m.addTag('caos_tormenta') } },
     end: (server) => {
@@ -96,7 +97,7 @@ const CAOS_EVENTS = {
     }
   },
   caceria: {
-    name: 'La Cacería', desc: 'Los monstruos te huelen desde el doble de distancia', color: 'red', weight: 3, dur: 10 * 60 * 20,
+    name: 'La Cacería', desc: 'Los monstruos te huelen desde el doble de distancia', color: 'red', weight: 3, fase: 1, dur: 10 * 60 * 20,
     onMob: (m) => {
       var inst = m.getAttribute($CaosAttributes.FOLLOW_RANGE)
       if (inst && !inst.hasModifier(new $CaosAttrMod(CAOS_FOLLOW_ID, 'caos_caceria', 1.0, $CaosAttrOp.MULTIPLY_BASE)))
@@ -105,7 +106,7 @@ const CAOS_EVENTS = {
     end: (server) => caosEachHostile(server, m => { var inst = m.getAttribute($CaosAttributes.FOLLOW_RANGE); if (inst) inst.removeModifier(CAOS_FOLLOW_ID) })
   },
   plaga: {
-    name: 'Plaga de Arañas', desc: 'Arañas por todas partes, y envenenan', color: 'dark_green', weight: 2, dur: 8 * 60 * 20, every: 300,
+    name: 'Plaga de Arañas', desc: 'Arañas por todas partes, y envenenan', color: 'dark_green', weight: 2, fase: 2, dur: 8 * 60 * 20, every: 300,
     onMob: (m) => { var t = String(m.type); if (t == 'minecraft:spider' || t == 'minecraft:cave_spider') m.addTag('caos_plaga') },
     pulse: (server) => caosTargets(server).forEach(p => {
       if (String(p.level.dimension) != 'minecraft:overworld') return
@@ -114,7 +115,7 @@ const CAOS_EVENTS = {
     })
   },
   asedio: {
-    name: 'Asedio', desc: 'Oleadas de monstruos te buscan', color: 'dark_red', weight: 2, dur: 6 * 60 * 20, every: 900,
+    name: 'Asedio', desc: 'Oleadas de monstruos te buscan', color: 'dark_red', weight: 2, fase: 2, dur: 6 * 60 * 20, every: 900,
     pulse: (server) => caosTargets(server).forEach(p => {
       if (String(p.level.dimension) != 'minecraft:overworld') return
       var pool = ['minecraft:zombie', 'minecraft:zombie', 'minecraft:skeleton', 'minecraft:spider', 'minecraft:creeper', 'minecraft:husk']
@@ -124,7 +125,7 @@ const CAOS_EVENTS = {
     })
   },
   cielo: {
-    name: 'Cielo Hostil', desc: 'Los phantoms cazan esta noche', color: 'dark_purple', weight: 2, dur: 10 * 60 * 20, every: 600, nightOnly: true,
+    name: 'Cielo Hostil', desc: 'Los phantoms cazan esta noche', color: 'dark_purple', weight: 2, fase: 2, dur: 10 * 60 * 20, every: 600, nightOnly: true,
     onMob: (m) => {
       if (String(m.type) != 'minecraft:phantom') return
       var inst = m.getAttribute($CaosAttributes.FLYING_SPEED)
@@ -139,7 +140,7 @@ const CAOS_EVENTS = {
     })
   },
   francotiradores: {
-    name: 'Francotiradores', desc: 'Los esqueletos llevan arcos de Poder', color: 'gray', weight: 2, dur: 10 * 60 * 20,
+    name: 'Francotiradores', desc: 'Los esqueletos llevan arcos de Poder', color: 'gray', weight: 2, fase: 1, dur: 10 * 60 * 20,
     onMob: (m) => {
       var t = String(m.type)
       if (t != 'minecraft:skeleton' && t != 'minecraft:stray') return
@@ -155,7 +156,7 @@ const CAOS_EVENTS = {
     })
   },
   furia: {
-    name: 'Furia de la Luna', desc: 'Luna llena: los monstruos son más fuertes y rápidos', color: 'gold', weight: 0, dur: 10000, fixed: true,
+    name: 'Furia de la Luna', desc: 'Luna llena: los monstruos son más fuertes y rápidos', color: 'gold', weight: 0, fase: 2, dur: 10000, fixed: true,
     onMob: (m, server, st) => {
       var left = Math.max(20, st.end - caosNow(server))
       m.potionEffects.add('minecraft:strength', left, 1, false, true)
@@ -232,11 +233,11 @@ function caosEnd(server, silent) {
   caosSave(server, st)
 }
 
-function caosPickRandom(night) {
+function caosPickRandom(night, fase) {
   var list = []
   Object.keys(CAOS_EVENTS).forEach(k => {
     var ev = CAOS_EVENTS[k]
-    if (ev.fixed || (ev.nightOnly && !night)) return
+    if (ev.fixed || (ev.nightOnly && !night) || ev.fase > fase) return
     for (var i = 0; i < ev.weight; i++) list.push(k)
   })
   return list[caosRnd(list.length)]
@@ -260,10 +261,13 @@ ServerEvents.tick(e => {
     if (ev.pulse && now - st.lastPulse >= ev.every) { st.lastPulse = now; caosSave(server, st); ev.pulse(server, st) }
   }
   if (!st.enabled) return
+  // Progresión (progression.js): sin eventos en la fase 0; cada evento tiene su fase mínima
+  var fase = global.progFase ? global.progFase(server) : 4
+  if (fase < 1) return
 
-  // Furia de la Luna: cada 2 lunas llenas (fase 0), toda la noche
+  // Furia de la Luna: cada 2 lunas llenas (fase lunar 0), toda la noche
   var fullMoon = server.overworld().getMoonPhase() == 0
-  if (fullMoon && tod >= 13000 && tod < 22500 && Math.floor(day / 8) % 2 == 1 && st.furiaDay != day && st.active != 'furia') {
+  if (fullMoon && tod >= 13000 && tod < 22500 && Math.floor(day / 8) % 2 == 1 && st.furiaDay != day && st.active != 'furia' && fase >= CAOS_EVENTS.furia.fase) {
     st.furiaDay = day
     caosSave(server, st)
     caosStart(server, 'furia', 23000 - tod)
@@ -274,7 +278,8 @@ ServerEvents.tick(e => {
   if (!st.active && now >= st.next && caosAliveCount(server) > 0) {
     st.next = now + CAOS_CHECK_EVERY
     caosSave(server, st)
-    if (Math.random() < CAOS_CHANCE) caosStart(server, caosPickRandom(tod >= 13000 && tod < 21000))
+    var pick = caosPickRandom(tod >= 13000 && tod < 21000, fase)
+    if (pick && Math.random() < (fase < 2 ? CAOS_CHANCE / 2 : CAOS_CHANCE)) caosStart(server, pick)
   }
 })
 

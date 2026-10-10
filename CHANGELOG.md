@@ -185,3 +185,32 @@ Backup del mundo v1.0: `backups/world-v1.0-20261007-224531/` (+ .tar.gz). Mundo 
 - Sin operadores (`ops.json` vacío): los comandos de admin (`/hub`, `/casino`, `/alma`, `/caos`) se usan desde la consola
   (`scripts/cmd.sh`). Ojo: en modo no premium `op <x>` acepta cualquier nombre (un `op list` accidental se revirtió).
 - Mundo regenerado desde la plantilla `montana-v2` (respaldo del anterior: `backups/antes-de-reset-world-20261010-170151.tar.gz`).
+
+## 2026-10-10 — Dificultad progresiva por fases + mundo nuevo (otra semilla)
+Muertes del mundo anterior (logs): Dread Hound, Nightmare Stalker (×2, además de 6 aldeanos), Decaying Zombie (Born in Chaos),
+2 disparos de Pillager. Antes también Corpse Fish (BiC) y congelados (Tough As Nails, ya quitado). Todo en las primeras horas.
+- `progression.js` (nuevo): fase global que solo sube; basta con que un jugador cumpla el hito.
+  | Fase | Hito | Se desbloquea | Dificultad IM (piso) |
+  |---|---|---|---|
+  | 0 Vanilla | inicio | nada de mods: solo mobs vanilla | 0 |
+  | 1 Despertar | primer diamante | Mowzie's (sin Frostmaw), BiC ligeros, caos suave (tormenta, cacería, francotiradores, ½ prob.) | 10 |
+  | 2 Infierno | entrar al Nether | resto de BiC, Cataclysm natural, Champions, lunas de Enhanced Celestials, todos los eventos + Furia | 30 |
+  | 3 Ojo del Fin | seguir un Ojo de Ender o matar al Wither | élites de BiC (Nightmare Stalker, Dread Hound, Lifestealer…) y Frostmaw | 60 |
+  | 4 Más allá | matar al Ender Dragon | — | 100 |
+  - Dificultad de Improved Mobs = piso de la fase + extra (cada 20 min con alguien vivo: +0 / 0.5 / 1 / 1.5 / 2 según la fase,
+    y bono la 1.ª vez que cae cada jefe: Wither 15, Dragón 20, jefes de Cataclysm 12–15, de Mowzie 8, Warden 10, Elder 5).
+  - BiC se bloquea en cualquier aparición; Mowzie's y Cataclysm solo en spawns naturales (estructuras y jefes intactos).
+    Champions: antes de la fase 2 se les quita el rango al aparecer (`champions remove`). Lunas: antes de la fase 2 se fuerza
+    la luna normal cada 10 s de noche.
+  - `/fase` (todos) · `/fase set <n>` · `/fase extra <n>` (consola). Anuncio con título al subir de fase.
+- `chaos_events.js`: cada evento tiene fase mínima; ninguno en la fase 0.
+- Improved Mobs (`common.toml`): crecimiento automático en 0 (lo maneja el script); sin armadura/armas/encantamientos/objetos
+  base (solo crecen con la dificultad); rompen bloques desde 20 y roban desde 35; sin neutrales agresivos ni monturas invocadas.
+- Mundo nuevo: semilla `4287312929936154381` (respaldo del anterior: `backups/antes-de-reset-world-20261010-172811.tar.gz`).
+  Hub + casino reconstruidos en `-48 62 8` (spawn `-48 63 25`), elegido con `/hub altura`: llano junto al spawn con el terreno
+  del casino ~5 bloques sobre el lobby. `server/defaultconfigs/` con los serverconfig del mundo anterior (Champions, etc.).
+  Plantilla: `semilla2-v1`.
+- Verificado en el server: carga sin errores; dificultad IM sigue a la fase; BiC por fase (fase 0 bloquea baby spider,
+  decaying zombie y dread hound; 1 solo baby spider; 2 + decaying zombie; 3 todos); un Champion invocado en fase 0 queda sin
+  rango y en fase 2 lo conserva; `/casino validar` OK; vista aérea del hub revisada. Sin probar: spawns naturales de Mowzie's
+  y Cataclysm (solo con jugadores) y el cambio de luna de noche.

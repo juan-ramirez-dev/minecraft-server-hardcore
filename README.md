@@ -3,6 +3,9 @@
 Servidor hardcore cooperativo **difícil de verdad**: progresión vanilla (Overworld → Nether → End → Dragón) con dificultad que
 sube con el tiempo y con cada jefe, Nether y End mucho más peligrosos, y mecánicas propias en KubeJS:
 
+- **Progresión por fases** (`progression.js`): empieza como Minecraft vanilla y se endurece con cada hito del grupo
+  (diamante → Nether → Ojo de Ender/Wither → Dragón): mobs de mods, Champions, Eventos del Caos, lunas de sangre y dificultad
+  de Improved Mobs se van desbloqueando. Los jugadores ven su fase con `/fase`.
 - **Spawn + casino** generados por script, dentro de una **zona segura** (sin mobs, sin daño, no se rompen bloques).
 - **Casino**: tragamonedas (1 esmeralda) y Cofre del Destino (8 esmeraldas) con premios de cualquier mod.
 - **Eventos del Caos**: de vez en cuando todo se pone peor por unos minutos (creepers cargados, plaga de arañas, asedios,
@@ -42,7 +45,7 @@ No se versionan: mundos, backups, JDK, librerías de Forge, jars de mods ni dato
 5. Arrancar: `scripts/launch-detached.sh` (tmux `mc-hardcore`). Consola: `scripts/console.sh`. Comando suelto: `scripts/cmd.sh "list"`.
 6. Primera vez en un mundo nuevo (como op): `/hub construir`, `/op <admin>`, `/whitelist add <jugador>`, y las gamerules del CHANGELOG.
 
-Reiniciar el mundo de prueba (server apagado): `scripts/plantilla.sh restaurar` → vuelve a la plantilla `casino-v1.1.0`
+Reiniciar el mundo de prueba (server apagado): `scripts/plantilla.sh restaurar` → vuelve a la plantilla más reciente (`semilla2-v1`)
 (hub + casino listos, sin jugadores). Guardar otra: `scripts/plantilla.sh guardar <nombre>`.
 
 Pack para jugadores: `python3 scripts/build-mrpack.py 1.1.0` → `dist/Hardcore-Coop-1.1.0.mrpack` (+ zip de mods).
@@ -51,9 +54,10 @@ Pack para jugadores: `python3 scripts/build-mrpack.py 1.1.0` → `dist/Hardcore-
 
 | Comando | Qué hace |
 |---|---|
-| `/hub construir` · `/hub construir_en <x y z>` · `/hub info` | Construye/repara el lobby + casino (hoy en la montaña: `102 111 850`) |
+| `/hub construir` · `/hub construir_en <x y z>` · `/hub info` | Construye/repara el lobby + casino (hoy junto al spawn: `-48 62 8`) |
 | `/hub altura <x> <z> <radio> <paso>` · `/hub volcar <x> <z> <radio>` | Exporta relieve/biomas o bloques de superficie a `kubejs/exported/` |
 | `/casino validar` · `/casino prueba <n>` | Verifica ítems/tablas de loot · simula tiradas |
+| `/fase` · `/fase set <n>` · `/fase extra <n>` | Fase de progresión (0–4) · forzar fase · fijar el extra de dificultad |
 | `/caos iniciar <evento>` · `/caos parar` · `/caos estado` · `/caos activar\|desactivar` | Eventos del Caos |
 | `/alma forzar` · `/alma reserva` · `/alma estado` · `/alma cancelar` · `/alma dar <jugador>` | Cofre del Alma (`reserva`: el periódico, sin muertos) |
 | `/tag <jugador> add espectador_libre` | Libera a un admin del espectador restringido |

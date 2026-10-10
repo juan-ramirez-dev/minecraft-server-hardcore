@@ -14,7 +14,7 @@
 	#So the difficulty increases by 0.01 every 2400 ticks (->0.1 per mc day since a mc day has 24000 ticks) till it reaches a difficulty of 10.
 	#Then it increases by 1 per mc day till it reaches 30 and then stops.
 	#If you want to use negative values use | instead of - as the delimiter.
-	"Difficulty Increase" = ["0.0-0.1", "250.0-0.0"]
+	"Difficulty Increase" = ["0.0-0.0"]
 	#Wether difficulty should only increase with at least one online players or not
 	"Ignore Players" = false
 	#If true will increase difficulty by the amount of time skipped. Else will only increase difficulty once.
@@ -173,22 +173,22 @@
 	"Break BlockEntities" = true
 	#Chance for neutral mobs to be aggressive
 	#Range: 0.0 ~ 1.0
-	"Neutral Aggressive Chance" = 0.05000000074505806
+	"Neutral Aggressive Chance" = 0.0
 	#List for of pairs containing which mobs auto target others. Syntax is [mob id]-[mob id] where second value is the target.
 	# e.g. minecraft:zombie-minecraft:skeleton makes all zombies target skeletons
 	"Auto Target List" = []
 	#Difficulty at which mobs are able to break blocks
 	#Range: 0.0 ~ 1.7976931348623157E308
-	"Difficulty Break AI" = 0.0
+	"Difficulty Break AI" = 20.0
 	#Difficulty at which mobs are able to steal items
 	#Range: 0.0 ~ 1.7976931348623157E308
-	"Difficulty Steal AI" = 0.0
+	"Difficulty Steal AI" = 35.0
 	#Chance for mobs to be able to summon an aquatic mount
 	#Range: 0.0 ~ 1.0
-	"Guardian Chance" = 0.5
+	"Guardian Chance" = 0.0
 	#Chance for mobs to be able to summon a flying mount
 	#Range: 0.0 ~ 1.0
-	"Phantom Chance" = 0.5
+	"Phantom Chance" = 0.0
 	#Set this to true to allow tnt thrown by mobs to destroy blocks
 	"TNT Block Destruction" = false
 	#Chance for a mob to ignore line of sight
@@ -214,7 +214,7 @@
 	"Entity Item Use Blacklist" = ["minecraft:drowned;TRIDENT", "minecraft:illusioner;BOW", "minecraft:piglin;CROSSBOW", "minecraft:pillager;CROSSBOW", "minecraft:skeleton;BOW", "minecraft:snow_golem;minecraft:snowball", "minecraft:stray;BOW", "minecraft:wither_skeleton;BOW"]
 	#Base chance that a mob can have one piece of armor
 	#Range: 0.0 ~ 1.0
-	"Equipment Chance" = 0.10000000149011612
+	"Equipment Chance" = 0.0
 	#Base chance for each additional armor pieces
 	#Range: 0.0 ~ 1.0
 	"Additional Equipment Chance" = 0.30000001192092896
@@ -226,13 +226,13 @@
 	"Armor Trim Chance" = 0.05000000074505806
 	#Chance for mobs to have a weapon
 	#Range: 0.0 ~ 1.0
-	"Weapon Chance" = 0.5
+	"Weapon Chance" = 0.0
 	#Adds additional x*difficulty% to base weapon chance
 	#Range: 0.0 ~ 1.7976931348623157E308
 	"Weapon Chance Add" = 0.30000001192092896
 	#Base chance for each armor pieces to get enchanted
 	#Range: 0.0 ~ 1.0
-	"Enchanting Chance" = 0.20000000298023224
+	"Enchanting Chance" = 0.0
 	#Adds additional x*difficulty% to base enchanting chance
 	#Range: 0.0 ~ 1.7976931348623157E308
 	"Enchanting Addition" = 0.20000000298023224
@@ -244,7 +244,7 @@
 	"Enchanting Whitelist" = false
 	#Chance for mobs to have an item in offhand
 	#Range: 0.0 ~ 1.0
-	"Item Equip Chance" = 0.5
+	"Item Equip Chance" = 0.0
 	#Adds additional x*difficulty% to base item chance
 	#Range: 0.0 ~ 1.7976931348623157E308
 	"Item Chance add" = 0.20000000298023224
