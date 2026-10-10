@@ -36,6 +36,7 @@ Al terminar **cada** cambio pedido: commit + push a `origin main` con la **cuent
 - Mods: `python3 scripts/fetch-mods.py` → `scripts/sync-mods.sh`
 - Pack jugadores: `python3 scripts/build-mrpack.py <versión>` → `dist/`
 - Java: siempre vía `source scripts/env.sh` (JDK 17 portátil en `jdk/`).
+- Server **no premium** y **sin operadores**: comandos de admin solo por consola (`scripts/cmd.sh`). Nunca `op list` (crea un op llamado "list").
 
 ## Reglas del proyecto
 - Disco **exFAT**: macOS crea `._*` que rompen Forge/KubeJS. Copiar con `cp -X`; los scripts de arranque los limpian.

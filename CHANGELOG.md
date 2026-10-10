@@ -176,3 +176,12 @@ Backup del mundo v1.0: `backups/world-v1.0-20261007-224531/` (+ .tar.gz). Mundo 
   `soul_chest.js` antes de usar el Corazón del Alma. Ahora la lógica va primero y `cancel()` al final.
 - Diagnóstico con registro temporal de clics (ya quitado): los clics en palanca/pantalla sí se detectaban.
 - Regla para scripts nuevos: nunca poner código después de `e.cancel()`.
+
+## 2026-10-10 — Modo no premium, sin operadores, mundo nuevo
+- `server.properties`: `online-mode=false` (entran cuentas no premium) y `enforce-secure-profile=false` (sin firma de chat).
+  Sin mods de autenticación, por decisión del usuario: cualquiera de la whitelist puede entrar con ese nombre.
+- Whitelist con UUIDs offline (`OfflinePlayer:<nombre>`): thisMonje, elCocoJo, janzers, + Metelerico.
+  Respaldo de whitelist/ops/usercache/server.properties premium en `backups/online-mode-20261010/`.
+- Sin operadores (`ops.json` vacío): los comandos de admin (`/hub`, `/casino`, `/alma`, `/caos`) se usan desde la consola
+  (`scripts/cmd.sh`). Ojo: en modo no premium `op <x>` acepta cualquier nombre (un `op list` accidental se revirtió).
+- Mundo regenerado desde la plantilla `montana-v2` (respaldo del anterior: `backups/antes-de-reset-world-20261010-170151.tar.gz`).
