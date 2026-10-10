@@ -163,3 +163,10 @@ Backup del mundo v1.0: `backups/world-v1.0-20261007-224531/` (+ .tar.gz). Mundo 
   `/alma reserva` lo fuerza; `/alma estado` muestra estructura y minutos de juego para el próximo.
 - Verificado: `/alma reserva` → cofre en un mausoleo con 1 spawner (`811 64 1179`); cancelado tras la prueba.
 - Whitelist: + elCocoJo.
+
+## 2026-10-10 — El Cofre del Alma trae un Reviver
+- Los dos cofres (por muerte y de reserva) traen `revivermod:reviver` (marca `SoulChest`, se quita al sacarlo) en vez del
+  Corazón del Alma. Se usa con el sistema de Reviver Mod: renombrar en yunque + clic derecho, o Reviver Altar + redstone.
+  Los Corazones ya existentes siguen funcionando. `/alma dar` entrega un Reviver.
+- Verificado: `/alma reserva` → mazmorra de zombis con 21 spawners, cofre con el Reviver; cancelado tras la prueba.
+- `dist/LEEME-amigos.txt` actualizado.

@@ -22,6 +22,8 @@ REGLAS Y NOVEDADES
  - Eventos del Caos: a veces, por unos minutos, todo se pone peor (creepers cargados, plaga de arañas,
    asedios, phantoms, esqueletos francotiradores…). Cada 2 lunas llenas: Furia de la Luna.
  - Cofre del Alma: si alguien muere, al rato aparece un cofre (normalmente en una Ciudad Antigua del Warden)
-   con un Corazón del Alma. Las coordenadas salen en el chat y dura 45 min. Renombra el Corazón en un yunque
-   con el nombre exacto del muerto y haz clic derecho: revive a tu lado.
+   con un Reviver. Además, cada 2-3 h de juego sale uno aunque nadie haya muerto, en una mazmorra o estructura
+   llena de monstruos: guárdenlo. Las coordenadas salen en el chat y dura 45 min.
+   Para revivir: renombra el Reviver en un yunque con el nombre exacto del muerto y haz clic derecho
+   (o ponlo en un Reviver Altar y dale redstone). El muerto tiene que estar conectado.
  - El Nether y el End son mucho más difíciles que en vanilla.

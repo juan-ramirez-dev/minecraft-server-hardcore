@@ -1,10 +1,11 @@
 // Cofre del Alma: revivir temprano sin hacer toda la progresión.
-// - Si hay jugadores muertos (espectadores), entre 20 y 40 min después aparece un cofre con un "Corazón del Alma",
+// - Si hay jugadores muertos (espectadores), entre 20 y 40 min después aparece un cofre con un Reviver (Reviver Mod),
 //   preferentemente dentro de una Ciudad Antigua (guarida del Warden) lejos de los vivos. Dura 45 min.
 // - Las coordenadas salen en el chat y en una bossbar con cuenta regresiva.
-// - Uso: renombrar el Corazón en un yunque con el nombre exacto del muerto y hacer clic derecho → revive a tu lado.
+// - Uso (lo maneja Reviver Mod): renombrar el Reviver en un yunque con el nombre exacto del muerto y clic derecho
+//   (o ponerlo en el Reviver Altar con redstone). Los Corazones del Alma que ya existan siguen funcionando.
 // - Además, cada 2–3 h de juego (con alguien vivo conectado) aparece un Cofre del Alma "de reserva" aunque nadie haya muerto,
-//   dentro de una estructura peligrosa y, si tiene, junto a un spawner. Su Corazón se puede guardar para la próxima muerte.
+//   dentro de una estructura peligrosa y, si tiene, junto a un spawner. Su Reviver se puede guardar para la próxima muerte.
 // Admin: /alma forzar | /alma reserva | /alma estado | /alma cancelar | /alma dar <jugador>
 // Nota Rhino: dentro de funciones se usa `var`.
 
@@ -37,6 +38,8 @@ const ALMA_HARD = {
 }
 const ALMA_BAR = 'alma:cofre'
 const ALMA_NAME = 'Corazón del Alma'
+// Reviver del cofre: marca SoulChest para saber cuándo lo sacan (no afecta a renombrarlo ni a usarlo)
+const ALMA_REVIVER_NBT = '{SoulChest:1b}'
 const ALMA_ITEM_NBT = '{SoulHeart:1b,display:{Name:\'{"text":"Corazón del Alma","color":"light_purple","italic":false}\',' +
   'Lore:[\'{"text":"Renómbralo en un yunque con el","color":"gray","italic":false}\',' +
   '\'{"text":"nombre exacto del jugador muerto","color":"gray","italic":false}\',' +
@@ -56,6 +59,12 @@ function almaState(server) {
   return st
 }
 function almaSave(server, st) { server.persistentData.putString('alma', JSON.stringify(st)) }
+
+function almaIsChestReviver(item) {
+  if (!item || String(item.id) != 'revivermod:reviver') return false
+  var nbt = item.nbt
+  return nbt != null && nbt.getBoolean('SoulChest')
+}
 
 function almaIsSoulHeart(item) {
   if (!item || String(item.id) != 'minecraft:heart_of_the_sea') return false
@@ -196,7 +205,7 @@ function almaSpawnChest(server, reserva) {
   }
   // getBlock ya cargó el chunk: el setblock funciona
   level.getBlock(spot[0], spot[1], spot[2]).set('minecraft:air')
-  almaCmd(server, `execute in minecraft:overworld run setblock ${spot[0]} ${spot[1]} ${spot[2]} minecraft:chest{CustomName:'{"text":"Cofre del Alma","color":"light_purple"}',Items:[{Slot:13b,id:"minecraft:heart_of_the_sea",Count:1b,tag:${ALMA_ITEM_NBT}}]}`)
+  almaCmd(server, `execute in minecraft:overworld run setblock ${spot[0]} ${spot[1]} ${spot[2]} minecraft:chest{CustomName:'{"text":"Cofre del Alma","color":"light_purple"}',Items:[{Slot:13b,id:"revivermod:reviver",Count:1b,tag:${ALMA_REVIVER_NBT}}]}`)
 
   var st = almaState(server)
   var now = almaNow(server)
@@ -221,8 +230,8 @@ function almaSpawnChest(server, reserva) {
     { text: 'Apareció un Cofre del Alma ' + where + ' en ', color: 'white' },
     { text: `X ${spot[0]}  Y ${spot[1]}  Z ${spot[2]}`, color: 'gold', bold: true },
     { text: ` (Overworld). Desaparece en ${ALMA_DURATION / 1200} min. ` + (reserva
-      ? 'Nadie ha muerto: su Corazón del Alma se puede guardar para la próxima muerte.'
-      : 'Dentro hay un Corazón del Alma para revivir a un muerto.'), color: 'white' }
+      ? 'Nadie ha muerto: su Reviver se puede guardar para la próxima muerte.'
+      : 'Dentro hay un Reviver: renómbralo en un yunque con el nombre del muerto y haz clic derecho.'), color: 'white' }
   ])
 }
 
@@ -302,13 +311,15 @@ ServerEvents.tick(e => {
   }
 })
 
-// Alguien tomó el Corazón → se anuncia y termina la cuenta regresiva
+// Alguien sacó el Reviver del cofre → se anuncia y termina la cuenta regresiva
 PlayerEvents.inventoryChanged(e => {
-  if (!almaIsSoulHeart(e.item)) return
+  var chestReviver = almaIsChestReviver(e.item)
+  if (!chestReviver && !almaIsSoulHeart(e.item)) return
+  if (chestReviver) e.item.removeTagKey('SoulChest')   // ya salió del cofre: vuelve a ser un Reviver normal
   var server = e.server
   var st = almaState(server)
   if (!st.active) return
-  almaTell(server, '@a', [{ text: `${e.player.username} tomó el Corazón del Alma.`, color: 'light_purple' }])
+  almaTell(server, '@a', [{ text: `${e.player.username} tomó el Reviver del Cofre del Alma.`, color: 'light_purple' }])
   almaCmd(server, 'execute as @a at @s run playsound minecraft:item.totem.use master @s ~ ~ ~ 0.6 1.2')
   almaFinish(server, st, 'taken')
 })
@@ -362,7 +373,7 @@ ServerEvents.commandRegistry(event => {
     }))
     .then(Commands.literal('dar').then(Commands.argument('jugador', Arguments.PLAYER.create(event)).executes(ctx => {
       var p = Arguments.PLAYER.getResult(ctx, 'jugador')
-      almaCmd(ctx.source.server, `give ${p.username} minecraft:heart_of_the_sea${ALMA_ITEM_NBT} 1`)
+      almaCmd(ctx.source.server, `give ${p.username} revivermod:reviver${ALMA_REVIVER_NBT} 1`)
       return 1
     })))
     .then(Commands.literal('estado').executes(ctx => {
