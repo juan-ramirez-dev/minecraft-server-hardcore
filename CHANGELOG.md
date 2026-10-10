@@ -214,3 +214,6 @@ Muertes del mundo anterior (logs): Dread Hound, Nightmare Stalker (×2, además 
   decaying zombie y dread hound; 1 solo baby spider; 2 + decaying zombie; 3 todos); un Champion invocado en fase 0 queda sin
   rango y en fase 2 lo conserva; `/casino validar` OK; vista aérea del hub revisada. Sin probar: spawns naturales de Mowzie's
   y Cataclysm (solo con jugadores) y el cambio de luna de noche.
+
+## 2026-10-10 — Whitelist
+- + daniel997608 (UUID offline `272a4bea-dd41-3750-9d4a-0b78a75001cc`).
