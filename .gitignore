@@ -36,3 +36,4 @@ server/config/spark/activity.json
 
 # Plantillas de mundo (scripts/plantilla.sh)
 plantillas/
+server/config/chunky/tasks/

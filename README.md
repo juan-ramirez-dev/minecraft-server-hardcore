@@ -51,7 +51,8 @@ Pack para jugadores: `python3 scripts/build-mrpack.py 1.1.0` → `dist/Hardcore-
 
 | Comando | Qué hace |
 |---|---|
-| `/hub construir` · `/hub construir_en <x y z>` · `/hub info` | Construye/repara el spawn + casino |
+| `/hub construir` · `/hub construir_en <x y z>` · `/hub info` | Construye/repara el lobby + casino (hoy en la montaña: `102 111 850`) |
+| `/hub altura <x> <z> <radio> <paso>` · `/hub volcar <x> <z> <radio>` | Exporta relieve/biomas o bloques de superficie a `kubejs/exported/` |
 | `/casino validar` · `/casino prueba <n>` | Verifica ítems/tablas de loot · simula tiradas |
 | `/caos iniciar <evento>` · `/caos parar` · `/caos estado` · `/caos activar\|desactivar` | Eventos del Caos |
 | `/alma forzar` · `/alma estado` · `/alma cancelar` · `/alma dar <jugador>` | Cofre del Alma |

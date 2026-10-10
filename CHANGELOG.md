@@ -132,3 +132,19 @@ Backup del mundo v1.0: `backups/world-v1.0-20261007-224531/` (+ .tar.gz). Mundo 
 - `python3 scripts/gen-hub.py --preview <dir>`: planta + fachada en HTML para revisar sin entrar al juego.
 - Verificado en el server: la función carga, `/hub construir` OK, 19 bloques clave comprobados con `execute if block`,
   `/casino validar` OK. Plantilla nueva: `lobby-v2` (la usa `plantilla.sh restaurar` por defecto).
+
+## 2026-10-10 — Hub en la montaña: casino neoclásico + lobby sencillo
+- Ubicación: ladera de un bosque de cerezos, origen `102 111 850` (la montaña llega a ~129). Spawn `102 112 867`
+  mirando al casino. Elegido con un mapa de alturas y biomas (`/hub altura`) buscando poco movimiento de tierra,
+  montaña detrás y vista al frente.
+- `scripts/gen-hub.py` reescrito (`--rot N` para orientar el frente):
+  - Casino estilo neoclásico (blanco + ladrillo rojo): pórtico de 6 columnas con estandartes, entablamento con luces,
+    pabellones con ventanal, panel escarlata, balcón y agujas; escalinata con divisores blancos y jardines escalonados
+    de setos y flores rojas; explanada con 2 fuentes. Interior: 8 tragamonedas, 4 mesas de cartas, candelabros,
+    tragaluz, rosetón morado y altar de obsidiana del Cofre del Destino.
+  - Lobby: claro con arcos de hojas, estanque con puente, terraza de madera y poste con faroles.
+  - Terreno: el casino va en una terraza 5 bloques sobre el lobby; alrededor se recorta/rellena en pendiente con pasto.
+- `hub_core.js`: `/hub construir` fuerza la carga de los chunks de la obra antes de construir (lejos del spawn fallaba).
+  Nuevos `/hub altura <x> <z> <radio> <paso>` y `/hub volcar <x> <z> <radio>` → `kubejs/exported/` (relieve/superficie).
+- Verificado en el server: 15/15 bloques clave, `/casino validar` OK, vistas aéreas renderizadas del volcado.
+- Plantilla: `montana-v1`. El hub anterior (`0 70 416`) sigue en el mundo: pendiente decidir cómo quitarlo.

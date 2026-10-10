@@ -5,6 +5,7 @@
 let $Heightmap = Java.loadClass('net.minecraft.world.level.levelgen.Heightmap$Types')
 const $AABB = Java.loadClass('net.minecraft.world.phys.AABB')
 const $Enemy = Java.loadClass('net.minecraft.world.entity.monster.Enemy')
+const $HubBlockPos = Java.loadClass('net.minecraft.core.BlockPos')
 
 global.hub = false
 
@@ -51,7 +52,16 @@ function hubBuild(server, at) {
     y = level.getHeight($Heightmap.MOTION_BLOCKING_NO_LEAVES, x, z) - 1
   }
   var L = global.HUB_LAYOUT
-  server.runCommandSilent(`execute in minecraft:overworld positioned ${x} ${y} ${z} run function hardcore_hub:build`)
+  // Los comandos solo colocan bloques en chunks cargados: forzar la carga de toda la obra, esperar y construir
+  var b = L.bounds
+  var area = `${x + b.minX} ${z + b.minZ} ${x + b.maxX} ${z + b.maxZ}`
+  server.runCommandSilent(`execute in minecraft:overworld run forceload add ${area}`)
+  server.scheduleInTicks(60, () => {
+    server.runCommandSilent(`execute in minecraft:overworld positioned ${x} ${y} ${z} run function hardcore_hub:build`)
+    server.runCommandSilent(`execute in minecraft:overworld run forceload remove ${area}`)
+    console.info(`Hub: obra terminada en ${x} ${y} ${z}`)
+    server.runCommandSilent(`tellraw @a[gamemode=creative] {"text":"Hub construido en ${x} ${y} ${z}","color":"green"}`)
+  })
   server.runCommandSilent('gamerule spawnRadius 0')
   var abs = p => [x + p[0], y + p[1], z + p[2]]
   global.hubSave(server, {
@@ -76,13 +86,13 @@ ServerEvents.commandRegistry(event => {
     .requires(s => s.hasPermission(2))
     .then(Commands.literal('construir').executes(ctx => {
       var h = hubBuild(ctx.source.server)
-      ctx.source.sendSystemMessage(Text.green(`Hub construido en ${h.origin.join(' ')}; spawn en ${h.spawn.join(' ')}`))
+      ctx.source.sendSystemMessage(Text.green(`Construyendo hub en ${h.origin.join(' ')} (listo en 3 s); spawn en ${h.spawn.join(' ')}`))
       return 1
     }))
     .then(Commands.literal('construir_en').then(Commands.argument('pos', Arguments.BLOCK_POS.create(event)).executes(ctx => {
       var bp = Arguments.BLOCK_POS.getResult(ctx, 'pos')
       var h = hubBuild(ctx.source.server, [bp.x, bp.y, bp.z])
-      ctx.source.sendSystemMessage(Text.green(`Hub construido en ${h.origin.join(' ')}; spawn en ${h.spawn.join(' ')}`))
+      ctx.source.sendSystemMessage(Text.green(`Construyendo hub en ${h.origin.join(' ')} (listo en 3 s); spawn en ${h.spawn.join(' ')}`))
       return 1
     })))
     .then(Commands.literal('diag').executes(ctx => { try {
@@ -96,6 +106,54 @@ ServerEvents.commandRegistry(event => {
       } catch (err) { ctx.source.sendSystemMessage(Text.red('diag error: ' + err)) }
       return 1
     }))
+    // Mapa de alturas (Overworld) para elegir dónde construir: /hub altura <x> <z> <radio> <paso> → kubejs/exported/alturas.json
+    .then(Commands.literal('altura').then(Commands.argument('x', Arguments.INTEGER.create(event)).then(Commands.argument('z', Arguments.INTEGER.create(event))
+      .then(Commands.argument('radio', Arguments.INTEGER.create(event)).then(Commands.argument('paso', Arguments.INTEGER.create(event)).executes(ctx => {
+        try {
+        var cx = Arguments.INTEGER.getResult(ctx, 'x'), cz = Arguments.INTEGER.getResult(ctx, 'z')
+        var r = Arguments.INTEGER.getResult(ctx, 'radio'), st = Arguments.INTEGER.getResult(ctx, 'paso')
+        var level = ctx.source.server.overworld()
+        var rows = [], brows = [], biomes = []
+        for (var z = cz - r; z <= cz + r; z += st) {
+          var row = [], brow = []
+          for (var x = cx - r; x <= cx + r; x += st) {
+            var y = level.getChunk(x >> 4, z >> 4).getHeight($Heightmap.MOTION_BLOCKING_NO_LEAVES, x & 15, z & 15)
+            row.push(y)
+            var bid = String(level.getBiome(new $HubBlockPos(x, y, z)).unwrapKey().get().location())
+            var bi = biomes.indexOf(bid)
+            if (bi < 0) { biomes.push(bid); bi = biomes.length - 1 }
+            brow.push(bi)
+          }
+          rows.push(row.join(',')); brows.push(brow.join(','))
+        }
+        JsonIO.write('kubejs/exported/alturas.json', { x0: cx - r, z0: cz - r, paso: st, filas: rows, biomas: biomes, filas_bioma: brows })
+        ctx.source.sendSystemMessage(Text.green(`Alturas: ${rows.length} filas → kubejs/exported/alturas.json`))
+        } catch (err) { ctx.source.sendSystemMessage(Text.red('altura error: ' + err)) }
+        return 1
+      }))))))
+    // Bloques de superficie (vista aérea): /hub volcar <x> <z> <radio> → kubejs/exported/superficie.json
+    .then(Commands.literal('volcar').then(Commands.argument('x', Arguments.INTEGER.create(event)).then(Commands.argument('z', Arguments.INTEGER.create(event))
+      .then(Commands.argument('radio', Arguments.INTEGER.create(event)).executes(ctx => {
+        try {
+        var cx = Arguments.INTEGER.getResult(ctx, 'x'), cz = Arguments.INTEGER.getResult(ctx, 'z'), r = Arguments.INTEGER.getResult(ctx, 'radio')
+        var level = ctx.source.server.overworld()
+        var hs = [], ids = [], pal = []
+        for (var z = cz - r; z <= cz + r; z++) {
+          var hrow = [], irow = []
+          for (var x = cx - r; x <= cx + r; x++) {
+            var y = level.getChunk(x >> 4, z >> 4).getHeight($Heightmap.WORLD_SURFACE, x & 15, z & 15)
+            var id = String(level.getBlock(x, y, z).id)
+            var k = pal.indexOf(id)
+            if (k < 0) { pal.push(id); k = pal.length - 1 }
+            hrow.push(y); irow.push(k)
+          }
+          hs.push(hrow.join(',')); ids.push(irow.join(','))
+        }
+        JsonIO.write('kubejs/exported/superficie.json', { x0: cx - r, z0: cz - r, alturas: hs, bloques: ids, paleta: pal })
+        ctx.source.sendSystemMessage(Text.green(`Superficie: ${hs.length}x${hs.length} → kubejs/exported/superficie.json`))
+        } catch (err) { ctx.source.sendSystemMessage(Text.red('volcar error: ' + err)) }
+        return 1
+      })))))
     .then(Commands.literal('info').executes(ctx => {
       var h = global.hubLoad(ctx.source.server)
       ctx.source.sendSystemMessage(h

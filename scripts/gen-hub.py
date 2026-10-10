@@ -1,71 +1,87 @@
 #!/usr/bin/env python3
-"""Genera la función hardcore_hub:build (spawn + casino) en server/kubejs/data/ (KubeJS la carga como datapack).
-Coordenadas relativas al origen = centro de la plaza a nivel del suelo (el piso es y=0, los jugadores pisan y=1).
-La ejecuta el comando /hub construir (kubejs/server_scripts/hub_core.js).
-El layout (zona segura, máquinas, cofre) también se exporta a kubejs/server_scripts/hub_layout.js para que coincidan.
+"""Genera la función hardcore_hub:build (lobby + casino) en server/kubejs/data/ (KubeJS la carga como datapack).
+Pensado para una ladera: el lobby (donde se aparece) queda abajo y el casino en una terraza 5 bloques más arriba,
+unidos por una escalinata. El terreno alrededor se recorta/rellena en pendiente para que encaje en la montaña.
+
+Coordenadas locales: origen = punto de referencia del lobby a nivel del suelo (y=0 es el piso del lobby).
++z local = "frente" (hacia abajo de la montaña, donde está el lobby); el casino queda hacia -z.
+ROT gira todo en sentido horario: 0 → el frente mira al sur, 1 → oeste, 2 → norte, 3 → este.
+La ejecuta /hub construir (kubejs/server_scripts/hub_core.js). El layout (zona segura, máquinas, cofre, spawn) se exporta
+a kubejs/server_scripts/hub_layout.js ya rotado.
 Solo usa bloques vanilla y de mods que TAMBIÉN tienen los clientes (Cataclysm, Born in Chaos); nunca de mods solo-server.
-Uso: python3 scripts/gen-hub.py [--preview DIR]   (--preview guarda una planta en PNG/HTML para revisar sin entrar al juego)"""
-import os, sys, json, math
+Uso: python3 scripts/gen-hub.py [--rot N] [--preview DIR]"""
+import os, sys, json, math, re
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "server/kubejs/data/hardcore_hub/functions/build.mcfunction")
 LAYOUT_JS = os.path.join(ROOT, "server/kubejs/server_scripts/hub_layout.js")
 
-# --- Paleta ---
-MC = "minecraft:"
-ARG = "born_in_chaos_v1:"
-CAT = "cataclysm:"
+ROT = int(sys.argv[sys.argv.index("--rot") + 1]) if "--rot" in sys.argv else 0
+
+MC, ARG, CAT = "minecraft:", "born_in_chaos_v1:", "cataclysm:"
 B = dict(
-    arg_brick=ARG + "black_argillite_brick", arg_wall=ARG + "black_argillite_brick_wall",
-    arg_col=ARG + "black_argillite_column[axis=y]", lamp=ARG + "argillite_lamp",
-    glass_red=ARG + "scarlet_stained_glass", glass_purple=ARG + "purple_stained_glass",
-    tiles=CAT + "stone_tiles", tile_slab=CAT + "stone_tile_slab[type=bottom]", pillar=CAT + "stone_pillar[axis=y]",
-    az_bricks=CAT + "azure_seastone_bricks", az_tiles=CAT + "azure_seastone_tiles", az_pillar=CAT + "azure_seastone_pillar[axis=y]",
-    az_chiseled=CAT + "chiseled_azure_seastone", az_slab=CAT + "polished_azure_seastone_slab[type=bottom]",
-    az_slab_top=CAT + "polished_azure_seastone_slab[type=top]",
-    steel=CAT + "black_steel_block", steel_wall=CAT + "black_steel_wall", ancient=CAT + "ancient_metal_block",
-    obs_bricks=CAT + "obsidian_bricks", obs_chiseled=CAT + "chiseled_obsidian_bricks", obs_polished=CAT + "polished_obsidian",
-    obs_pillar=CAT + "obsidian_pillar[axis=y]",
+    lamp=ARG + "argillite_lamp", glass_red=ARG + "scarlet_stained_glass", glass_purple=ARG + "purple_stained_glass",
+    qwall=CAT + "quartz_brick_wall", steel=CAT + "black_steel_block", steel_wall=CAT + "black_steel_wall",
+    ancient=CAT + "ancient_metal_block", obs_chiseled=CAT + "chiseled_obsidian_bricks", obs_polished=CAT + "polished_obsidian",
+    obs_pillar=CAT + "obsidian_pillar[axis=y]", obs_stairs=CAT + "obsidian_brick_stairs",
 )
 
-# --- Geometría ---
-R, CUT = 17, 25                 # plaza octogonal: max(|x|,|z|) <= R y |x|+|z| <= CUT
-CX0, CX1, CZ0, CZ1 = 22, 50, -12, 12   # casino (paredes exteriores); la fachada es la pared oeste (x=CX0)
-WALL_H = 7                      # paredes y=1..7, techo en y=8
-FACADE_Z = CZ1                  # la fachada alta ocupa todo el frente
-MARGIN = 8
-ZONE = dict(minX=-R - MARGIN, maxX=CX1 + MARGIN, minZ=-max(R, CZ1) - MARGIN, maxZ=max(R, CZ1) + MARGIN)
-MACHINE_X = [28, 32, 36, 40]    # tragamonedas en la pared norte (z=CZ0+1) y sur (z=CZ1-1)
-DESTINO = (46, 3, 0)            # Cofre del Destino (ender chest sobre el altar)
-SPAWN = (0, 1, 9)               # punto de aparición: al sur de la fuente, mirando al norte
+# --- Geometría (local) ---
+YC = 5                               # piso de la terraza del casino (bloque); el lobby está en y=0
+Y1 = YC + 1                          # primer bloque sobre el piso del casino
+HX = 13                              # sala: interior x -13..13 (paredes en ±14)
+HZ0, HZ1 = -36, -14                  # sala: pared trasera z=-36, pared frontal z=-14
+WALL_TOP = 17                        # paredes de la sala hasta y=17, techo y=18
+PAV_X0, PAV_X1, PAV_Z0, PAV_Z1 = 9, 17, -16, -10    # pabellón este (y su espejo al oeste)
+PAV_TOP = 18
+TERR = dict(x0=-19, x1=19, z0=-40, z1=-6)           # terraza (superficie y=YC)
+LOBBY_C, LOBBY_R = (0, 11), 9
+MACHINE_Z = [-18, -22, -26, -30]     # tragamonedas en las paredes oeste (x=-HX) y este (x=HX)
+DESTINO = (0, YC + 3, -32)
+SPAWN = (0, 1, 17)                   # en el lobby, mirando al casino (-z local)
 SPAWN_ANGLE = 180
+BLEND, K = 12, 1.0                   # ancho de la transición del terreno y pendiente (alto por bloque de distancia)
+SAFE_MARGIN = 6
+
+# ============================================================================================
+# Rotación (local → mundo)
+DIRS = ["north", "east", "south", "west"]
+def rot_xz(x, z):
+    for _ in range(ROT): x, z = -z, x
+    return x, z
+def rot_state(block):
+    if ROT == 0 or "[" not in block: return block
+    block = re.sub(r"facing=(north|east|south|west)", lambda m: "facing=" + DIRS[(DIRS.index(m.group(1)) + ROT) % 4], block)
+    if ROT % 2: block = re.sub(r"axis=([xz])", lambda m: "axis=" + ("z" if m.group(1) == "x" else "x"), block)
+    return re.sub(r"rotation=(\d+)", lambda m: f"rotation={(int(m.group(1)) + 4 * ROT) % 16}", block)
 
 cmds = []
-W = {}                          # mundo simulado para la vista previa: (x,y,z) -> bloque
+W = {}                               # mundo simulado en coordenadas locales (vista previa)
 
 def _id(block): return block if ":" in block.split("[")[0] else MC + block
 
-def fill(x0, y0, z0, x1, y1, z1, block, mode=""):
+def fill(x0, y0, z0, x1, y1, z1, block, mode="", sim=True):
     block = _id(block)
     xs = sorted((x0, x1)); ys = sorted((y0, y1)); zs = sorted((z0, z1))
-    # divide en bloques de <= 32768 para respetar el límite de /fill
     area = (xs[1] - xs[0] + 1) * (zs[1] - zs[0] + 1)
-    step = max(1, 32768 // area)
+    step = max(1, 32768 // area)     # límite de /fill
+    (ax, az), (bx, bz) = rot_xz(xs[0], zs[0]), rot_xz(xs[1], zs[1])
     y = ys[0]
     while y <= ys[1]:
         ye = min(ys[1], y + step - 1)
-        cmds.append(f"fill ~{xs[0]} ~{y} ~{zs[0]} ~{xs[1]} ~{ye} ~{zs[1]} {block}{(' ' + mode) if mode else ''}")
+        cmds.append(f"fill ~{ax} ~{y} ~{az} ~{bx} ~{ye} ~{bz} {rot_state(block)}{(' ' + mode) if mode else ''}")
         y = ye + 1
-    if mode: return
+    if mode or not sim: return
     for x in range(xs[0], xs[1] + 1):
-        for y in range(ys[0], ys[1] + 1):
+        for yy in range(ys[0], ys[1] + 1):
             for z in range(zs[0], zs[1] + 1):
-                if block == MC + "air": W.pop((x, y, z), None)
-                else: W[(x, y, z)] = block
+                if block == MC + "air": W.pop((x, yy, z), None)
+                else: W[(x, yy, z)] = block
 
 def setb(x, y, z, block):
     block = _id(block)
-    cmds.append(f"setblock ~{x} ~{y} ~{z} {block}")
+    wx, wz = rot_xz(x, z)
+    cmds.append(f"setblock ~{wx} ~{y} ~{wz} {rot_state(block)}")
     W[(x, y, z)] = block
 
 def _sign_nbt(lines, color):
@@ -73,303 +89,274 @@ def _sign_nbt(lines, color):
     for i in range(4):
         t = lines[i] if i < len(lines) else ""
         bold = i == 0
-        msgs.append("'" + json.dumps({"text": t, "bold": bold, "color": "gold" if bold else color}, ensure_ascii=False).replace("'", "\\'") + "'")
-    return "{front_text:{has_glowing_text:1b,color:\"white\",messages:[" + ",".join(msgs) + "]},is_waxed:1b}"
-
-def sign(x, y, z, facing, lines, color="white", wood="dark_oak"):
+        msgs.append("'" + json.dumps({"text": t, "bold": bold, "color": "dark_red" if bold else color}, ensure_ascii=False).replace("'", "\\'") + "'")
+    return "{front_text:{has_glowing_text:1b,messages:[" + ",".join(msgs) + "]},is_waxed:1b}"
+def sign(x, y, z, facing, lines, color="black", wood="spruce"):
     setb(x, y, z, f"{wood}_wall_sign[facing={facing}]" + _sign_nbt(lines, color))
-
-def sign_post(x, y, z, rotation, lines, color="white", wood="dark_oak"):
+def sign_post(x, y, z, rotation, lines, color="black", wood="spruce"):
     setb(x, y, z, f"{wood}_sign[rotation={rotation}]" + _sign_nbt(lines, color))
 
-def in_plaza(x, z): return max(abs(x), abs(z)) <= R and abs(x) + abs(z) <= CUT
-def plaza_edge(x, z):
-    return in_plaza(x, z) and any(not in_plaza(x + dx, z + dz) for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)))
+def leaves(x, y, z, i=0):
+    kinds = ("azalea_leaves", "oak_leaves", "flowering_azalea_leaves", "azalea_leaves", "oak_leaves")
+    setb(x, y, z, kinds[(x * 3 + y * 5 + z * 7 + i) % len(kinds)] + "[persistent=true]")
 
 # ============================================================================================
-# 1. Terreno: limpiar arriba, rellenar abajo, césped
-zx0, zx1, zz0, zz1 = ZONE["minX"], ZONE["maxX"], ZONE["minZ"], ZONE["maxZ"]
-fill(zx0, 1, zz0, zx1, 48, zz1, "air")
-for b in ("air", "water", "lava", "cave_air"):
-    fill(zx0, -14, zz0, zx1, -1, zz1, "stone", f"replace minecraft:{b}")
-fill(zx0, -3, zz0, zx1, -1, zz1, "dirt")
-fill(zx0, 0, zz0, zx1, 0, zz1, "grass_block")
+# 1. Terreno: plataforma del lobby (y=0) y terraza del casino (y=YC), con transición en pendiente
+foot = {}                            # (x,z) -> altura objetivo del suelo
+for x in range(-20, 21):
+    for z in range(-6, 22):
+        if math.hypot(x - LOBBY_C[0], z - LOBBY_C[1]) <= LOBBY_R + 0.5: foot[(x, z)] = 0
+for x in range(-20, 21):
+    for z in range(-5, 3): foot[(x, z)] = 0          # escalinata, jardines y camino
+for x in range(TERR["x0"] - 1, TERR["x1"] + 2):
+    for z in range(TERR["z0"], TERR["z1"] + 1): foot[(x, z)] = YC
+fl = list(foot.items())
+fx = [p[0] for p in foot]; fz = [p[1] for p in foot]
+for x in range(min(fx) - BLEND, max(fx) + BLEND + 1):
+    for z in range(min(fz) - BLEND, max(fz) + BLEND + 1):
+        if (x, z) in foot:
+            t = foot[(x, z)]
+            fill(x, t + 1, z, x, t + 64, z, "air", sim=False)
+            fill(x, -30, z, x, t - 4, z, "stone", "replace minecraft:air")
+            fill(x, -30, z, x, t - 4, z, "stone", "replace minecraft:water")
+            fill(x, t - 3, z, x, t - 1, z, "dirt", sim=False)
+            setb(x, t, z, "grass_block")
+            continue
+        d, t = min((math.hypot(x - a, z - b), tt) for (a, b), tt in fl)
+        if d > BLEND: continue
+        h = math.ceil(d * K)
+        fill(x, t + h + 1, z, x, t + 64, z, "air", sim=False)
+        fill(x, t - h, z, x, t + h, z, "air", "replace #minecraft:logs")       # sin troncos sueltos; las hojas caen solas
+        fill(x, -30, z, x, t - h, z, "dirt", "replace minecraft:air")
+        fill(x, t - h, z, x, t - h, z, "grass_block", "replace minecraft:dirt")
+        for m in ("#minecraft:base_stone_overworld", "minecraft:dirt", "#minecraft:coal_ores"):   # el corte queda con pasto
+            fill(x, t + h, z, x, t + h, z, "grass_block", f"replace {m}")
 
 # ============================================================================================
-# 2. Plaza octogonal
-for x in range(-R, R + 1):
-    for z in range(-R, R + 1):
-        if not in_plaza(x, z): continue
-        d = math.hypot(x, z)
-        if plaza_edge(x, z): b = B["arg_brick"]
-        elif abs(x) <= 1 or abs(z) <= 1: b = "polished_deepslate"
-        elif abs(x) == 2 or abs(z) == 2: b = B["tiles"]
-        elif 6.5 <= d < 8.5: b = B["tiles"]
-        elif 8.5 <= d < 9.5: b = "chiseled_stone_bricks" if (x + z) % 2 == 0 else "stone_bricks"
-        else: b = "stone_bricks" if (x * 7 + z * 3) % 5 else "cracked_stone_bricks"
-        setb(x, 0, z, b)
+# 2. Lobby: claro con arcos de hojas, estanque, terraza de madera y poste con farol
+cx, cz = LOBBY_C
+for x in range(cx - LOBBY_R, cx + LOBBY_R + 1):
+    for z in range(cz - LOBBY_R, cz + LOBBY_R + 1):
+        r = math.hypot(x - cx, z - cz)
+        if r > LOBBY_R + 0.5: continue
+        if 2.6 <= r <= 3.6 or (abs(x - cx) <= 1 and z > cz): setb(x, 0, z, "dirt_path")
+        elif (x * 13 + z * 7) % 9 == 0: setb(x, 1, z, "grass")
+        elif (x * 5 + z * 11) % 17 == 0: setb(x, 1, z, ["poppy", "dandelion", "oxeye_daisy", "cornflower"][(x + z) % 4])
+for x in range(-2, 3):
+    for z in range(0, 3): setb(x, 0, z, "dirt_path")
+# estanque (oeste) con nenúfares y puente de madera
+for x in range(cx - 8, cx):
+    for z in range(cz - 4, cz + 5):
+        if ((x - (cx - 5)) / 2.6) ** 2 + ((z - cz) / 3.4) ** 2 <= 1:
+            setb(x, -1, z, "clay"); setb(x, 0, z, "water")
+            if (x + z * 3) % 5 == 0: setb(x, 1, z, "lily_pad")
+for x in range(cx - 8, cx - 2): setb(x, 1, cz, "spruce_slab[type=bottom]")
+# terraza de madera (este) con baranda y bancos
+for x in range(cx + 3, cx + 8):
+    for z in range(cz - 3, cz + 4):
+        if math.hypot(x - cx, z - cz) <= LOBBY_R - 0.5: setb(x, 0, z, "spruce_planks")
+for z in range(cz - 3, cz + 4): setb(cx + 8, 1, z, "spruce_fence")
+for z in (cz - 2, cz - 1, cz + 1, cz + 2): setb(cx + 6, 1, z, "spruce_stairs[facing=east]")
+setb(cx + 6, 1, cz, "spruce_slab[type=bottom]")
+for (bx, bz, f) in ((cx - 2, cz - 4, "north"), (cx + 2, cz - 4, "north")):
+    setb(bx, 1, bz, f"spruce_stairs[facing={f}]")
+# poste central con travesaño, faroles y bandera
+for y in range(1, 7): setb(cx, y, cz, "spruce_fence")
+for dx in (-1, 1):
+    setb(cx + dx, 6, cz, "spruce_fence")
+    setb(cx + dx, 5, cz, "lantern[hanging=true]")
+setb(cx, 7, cz, "light_blue_banner[rotation=0]")
+# arcos de hojas cruzados sobre el claro
+for x in range(-10, 11):
+    for y in range(1, 11):
+        if 8.4 <= math.hypot(x, y) <= 9.8:
+            for d in (-1, 0, 1):
+                leaves(cx + x, y, cz + d)
+                leaves(cx + d, y, cz + x, 1)
+# faroles en el borde
+for (lx, lz) in ((cx - 6, cz - 6), (cx + 6, cz - 6), (cx - 6, cz + 6), (cx + 6, cz + 6)):
+    for y in (1, 2): setb(lx, y, lz, "spruce_fence")
+    setb(lx, 3, lz, "lantern")
+# letreros frente al spawn (miran al sur: se leen desde el spawn)
+sign_post(-4, 1, 15, 0, ["REGLAS", "Hardcore real:", "si mueres quedas", "de espectador"])
+sign_post(-2, 1, 15, 0, ["REVIVIR", "Cofre del Alma:", "sale en el chat", "tras una muerte"])
+sign_post(2, 1, 15, 0, ["ZONA SEGURA", "sin mobs, sin", "daño ni romper", "bloques"])
+sign_post(4, 1, 15, 0, ["CASINO", "sube la", "escalinata", "↑"])
 
-# murete perimetral con columnas y faroles; entradas de 5 de ancho en los 4 ejes
-edge = [(x, z) for x in range(-R, R + 1) for z in range(-R, R + 1) if plaza_edge(x, z)]
-for (x, z) in edge:
-    if abs(x) <= 2 or abs(z) <= 2: continue
-    corner = abs(x) + abs(z) in (CUT, CUT - 1) and (abs(x) == R or abs(z) == R)
-    if corner or (abs(x) == R and z % 4 == 0) or (abs(z) == R and x % 4 == 0):
-        for y in (1, 2, 3): setb(x, y, z, B["arg_col"])
-        setb(x, 4, z, B["lamp"])
-    else:
-        setb(x, 1, z, B["arg_wall"])
-
-# arcos de entrada (pilares de piedra, dintel, faroles colgantes)
-def arch(axis, s):
-    # axis 'z': entrada norte/sur en z = s*R ; axis 'x': entrada este/oeste en x = s*R
-    for o in (-3, 3):
-        p = (o, s * R) if axis == "z" else (s * R, o)
-        for y in range(1, 6): setb(p[0], y, p[1], B["pillar"])
-    for o in range(-3, 4):
-        p = (o, s * R) if axis == "z" else (s * R, o)
-        setb(p[0], 6, p[1], "chiseled_stone_bricks" if o == 0 else B["tiles"])
-        if abs(o) == 3: setb(p[0], 7, p[1], B["lamp"])
-    for o in (-1, 1):
-        p = (o, s * R) if axis == "z" else (s * R, o)
-        setb(p[0], 5, p[1], "lantern[hanging=true]")
-for axis in ("x", "z"):
-    for s in (-1, 1): arch(axis, s)
-
-# jardines con cerezo en las 4 diagonales
-def cherry(cx, cz):
-    for x in range(cx - 2, cx + 3):
-        for z in range(cz - 2, cz + 3):
-            if max(abs(x - cx), abs(z - cz)) == 2: setb(x, 1, z, B["tile_slab"])
-            else: setb(x, 0, z, "grass_block")
-    for y in range(1, 6): setb(cx, y, cz, "cherry_log[axis=y]")
-    for y, r in ((4, 2), (5, 2), (6, 1)):
-        for x in range(cx - r, cx + r + 1):
-            for z in range(cz - r, cz + r + 1):
-                if (x, z) == (cx, cz) and y < 6: continue
-                if r == 2 and abs(x - cx) == 2 and abs(z - cz) == 2: continue
-                setb(x, y, z, "cherry_leaves[persistent=true]")
-    for (dx, dz, f) in ((-1, -1, "allium"), (1, 1, "pink_tulip"), (-1, 1, "lily_of_the_valley"), (1, -1, "azure_bluet")):
-        setb(cx + dx, 1, cz + dz, f)
-    for (dx, dz) in ((0, -1), (0, 1), (-1, 0), (1, 0)):
-        setb(cx + dx, 1, cz + dz, "pink_petals[flower_amount=4,facing=north]")
-for sx in (-1, 1):
-    for sz in (-1, 1): cherry(sx * 11, sz * 11)
-
-# bancos a los lados de los caminos, mirando al camino, con apoyabrazos
-def bench(x, z, along, facing):
-    for o in (-1, 0, 1):
-        p = (x, z + o) if along == "z" else (x + o, z)
-        setb(p[0], 1, p[1], f"dark_oak_stairs[facing={facing}]")
-    for o in (-2, 2):
-        p = (x, z + o) if along == "z" else (x + o, z)
-        setb(p[0], 1, p[1], f"dark_oak_trapdoor[facing={facing},open=true,half=bottom]")
-for s in (-1, 1):
-    bench(-4, s * 11, "z", "west"); bench(4, s * 11, "z", "east")
-    bench(s * 12, -4, "x", "north"); bench(s * 12, 4, "x", "south")
-
-# faroles alrededor de la fuente
-for (x, z) in ((5, 5), (-5, 5), (5, -5), (-5, -5)):
-    for y in (1, 2, 3): setb(x, y, z, B["arg_wall"])
-    setb(x, 4, z, B["lamp"])
-
-# fuente central de piedra marina azul (Cataclysm) con cascada
-def in_basin(x, z): return max(abs(x), abs(z)) <= 4 and abs(x) + abs(z) <= 6
-for x in range(-4, 5):
-    for z in range(-4, 5):
-        if not in_basin(x, z): continue
-        rim = any(not in_basin(x + dx, z + dz) for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)))
-        if rim:
-            setb(x, 0, z, B["az_bricks"]); setb(x, 1, z, B["az_slab"])
-        else:
-            setb(x, -1, z, "sea_lantern" if abs(x) == abs(z) == 2 else B["az_tiles"])
-            setb(x, 0, z, "water")
-for y in range(0, 4): setb(0, y, 0, B["az_pillar"])
-setb(0, 4, 0, B["az_chiseled"])
-for (dx, dz) in ((1, 0), (-1, 0), (0, 1), (0, -1)): setb(dx, 4, dz, B["az_slab_top"])
-setb(0, 5, 0, "water")
-
-# tablero de reglas (norte): muro con marco de pilares, murales y letreros
-for x in range(-6, 7):
-    for y in range(1, 5): setb(x, y, -14, B["tiles"])
-    setb(x, 5, -14, B["tile_slab"])
+# ============================================================================================
+# 3. Escalinata con divisores blancos y jardines escalonados (setos + flores rojas)
+for k in range(1, YC + 1):
+    z = -k
+    for x in range(-6, 7):
+        if k > 1: fill(x, 0, z, x, k - 1, z, "stone_bricks")
+        setb(x, k, z, "smooth_quartz_stairs[facing=north]" if abs(x) == 2 else "stone_brick_stairs[facing=north]")
+    for x in (-7, 7):
+        fill(x, 0, z, x, k, z, "quartz_bricks")
+        setb(x, k + 1, z, B["qwall"])
 for x in (-7, 7):
-    for y in range(1, 6): setb(x, y, -14, B["pillar"])
-    setb(x, 6, -14, B["lamp"])
-setb(-6, 4, -13, CAT + "azure_seastone_mural_thunder[face=wall,facing=south]")
-setb(6, 4, -13, CAT + "azure_seastone_mural_sea[face=wall,facing=south]")
-sign(-4, 2, -13, "south", ["REGLAS", "Hardcore real:", "si mueres quedas", "de espectador"])
-sign(-2, 2, -13, "south", ["REVIVIR", "Cofre del Alma:", "sale en el chat", "tras una muerte"])
-sign(0, 3, -13, "south", ["BIENVENIDOS", "aquí se muere", "de verdad", "suerte"])
-sign(2, 2, -13, "south", ["ZONA SEGURA", "sin mobs, sin", "daño ni romper", "bloques"])
-sign(4, 2, -13, "south", ["EVENTOS", "del Caos: a veces", "todo se pone", "peor por un rato"])
-
-# letreros junto al spawn (el jugador aparece mirando al norte; el casino queda a su derecha)
-sign_post(3, 1, 7, 0, ["CASINO", "→ al este", "tragamonedas y", "Cofre del Destino"])
-sign_post(-3, 1, 7, 0, ["REGLAS", "↑ al norte", "léelas antes", "de salir"])
-
-# ============================================================================================
-# 3. Camino plaza → casino
-for x in range(R + 1, CX0):
-    for z in range(-2, 3):
-        setb(x, 0, z, "polished_deepslate" if abs(z) <= 1 else "gold_block")
-for x in (19,):
-    for s in (-1, 1):
-        for y in (1, 2, 3): setb(x, y, s * 4, B["arg_wall"])
-        setb(x, 4, s * 4, B["lamp"])
+    setb(x, 1, 0, "quartz_bricks"); setb(x, 2, 0, B["qwall"]); setb(x, 3, 0, "lantern")
+for side in (-1, 1):
+    for k in range(1, YC + 1):
+        z = -k
+        for ax in range(8, 20):
+            x = side * ax
+            if k > 1: fill(x, 0, z, x, k - 2, z, "dirt")
+            setb(x, k - 1, z, "grass_block")
+            if k % 2: setb(x, k, z, "azalea_leaves[persistent=true]")
+            else: setb(x, k, z, "red_tulip" if ax % 2 else "poppy")
+    for k in range(0, YC + 1):            # muro de contención blanco al costado de los jardines
+        fill(side * 20, 0, -k, side * 20, k, -k, "quartz_bricks")
 
 # ============================================================================================
-# 4. Casino
-# zócalo y piso exterior
-fill(CX0 - 1, 0, CZ0 - 1, CX1 + 1, 0, CZ1 + 1, "polished_blackstone_bricks")
-# setos con flores alrededor (norte, sur y este)
-for x in range(CX0, CX1 + 1):
-    for z in (CZ0 - 2, CZ1 + 2):
-        setb(x, 0, z, "grass_block")
-        setb(x, 1, z, "flowering_azalea_leaves[persistent=true]" if x % 3 == 0 else "azalea_leaves[persistent=true]")
-for z in range(CZ0 - 2, CZ1 + 3):
-    setb(CX1 + 2, 0, z, "grass_block")
-    setb(CX1 + 2, 1, z, "flowering_azalea_leaves[persistent=true]" if z % 3 == 0 else "azalea_leaves[persistent=true]")
+# 4. Explanada frente al casino, con fuentes laterales
+for x in range(TERR["x0"], TERR["x1"] + 1):
+    for z in range(-9, -5):
+        setb(x, YC, z, "polished_andesite" if (x + z) % 2 else "stone_bricks")
+for x in range(-6, 7):
+    for z in range(-13, -5): setb(x, YC, z, "smooth_quartz" if abs(x) == 6 else "stone_bricks")
+for sx in (-1, 1):
+    fx_, fz_ = sx * 13, -7
+    for x in range(fx_ - 1, fx_ + 2):
+        for z in range(fz_ - 1, fz_ + 2):
+            setb(x, Y1, z, "water" if (x, z) == (fx_, fz_) else "smooth_quartz")
+    for (x, z) in ((fx_ - 1, fz_ - 1), (fx_ + 1, fz_ - 1), (fx_ - 1, fz_ + 1), (fx_ + 1, fz_ + 1)):
+        setb(x, Y1 + 1, z, B["qwall"]); setb(x, Y1 + 2, z, B["qwall"]); setb(x, Y1 + 3, z, "lantern")
 
-# muros: argilita negra con pilastras cada 4, franja dorada y parapeto con faroles
-fill(CX0, 1, CZ0, CX1, WALL_H, CZ1, B["arg_brick"])
-fill(CX0 + 1, 1, CZ0 + 1, CX1 - 1, WALL_H, CZ1 - 1, "air")
-def pilaster(x, z):
-    return (x - CX0) % 4 == 0 if z in (CZ0, CZ1) else (z - CZ0) % 4 == 0
-for x in range(CX0, CX1 + 1):
-    for z in range(CZ0, CZ1 + 1):
-        if x not in (CX0, CX1) and z not in (CZ0, CZ1): continue
-        if pilaster(x, z):
-            for y in range(1, WALL_H + 1): setb(x, y, z, B["arg_col"])
-        setb(x, WALL_H + 1, z, "gold_block")
-        if pilaster(x, z): setb(x, WALL_H + 2, z, B["lamp"])
-        else: setb(x, WALL_H + 2, z, "polished_blackstone_brick_wall")
-# ventanales escarlata (parte alta, sobre las máquinas) en norte y sur
-for z in (CZ0, CZ1):
-    for x in range(CX0 + 1, CX1):
-        if (x - CX0) % 4 != 0: fill(x, 4, z, x, 6, z, B["glass_red"])
-# rosetón morado detrás del Cofre del Destino (pared este)
-for z in range(-4, 5):
-    for y in range(1, WALL_H + 1):
-        if (z / 3.6) ** 2 + ((y - 4) / 3.2) ** 2 <= 1: setb(CX1, y, z, B["glass_purple"])
-setb(CX1, 4, 0, B["ancient"])
+# ============================================================================================
+# 5. Casino neoclásico
+# sala: base blanca, cuerpo de ladrillo rojo con pilastras blancas, cornisa y parapeto
+fill(-HX - 1, Y1, HZ0, HX + 1, WALL_TOP, HZ1, "bricks")
+fill(-HX, Y1, HZ0 + 1, HX, WALL_TOP, HZ1 - 1, "air")
+for x in range(-HX - 1, HX + 2):
+    for z in range(HZ0, HZ1 + 1):
+        if abs(x) != HX + 1 and z not in (HZ0, HZ1): continue
+        setb(x, Y1, z, "quartz_bricks")
+        if (abs(x) == HX + 1 and (z - HZ0) % 4 == 0) or (z in (HZ0, HZ1) and x % 4 == 0):
+            for y in range(Y1 + 1, WALL_TOP): setb(x, y, z, "quartz_pillar[axis=y]")
+        setb(x, WALL_TOP, z, "smooth_quartz")
+        setb(x, WALL_TOP + 2, z, B["qwall"] if (x + z) % 4 else "chiseled_quartz_block")
+# ventanales altos en los costados (sobre las máquinas) y rosetón morado atrás
+for z in range(HZ0 + 1, HZ1):
+    if (z - HZ0) % 4 == 0: continue
+    for sx in (-1, 1): fill(sx * (HX + 1), 11, z, sx * (HX + 1), 15, z, "white_stained_glass_pane")
+for x in range(-5, 6):
+    for y in range(Y1 + 1, WALL_TOP):
+        if (x / 4.6) ** 2 + ((y - 11) / 4.6) ** 2 <= 1: setb(x, y, HZ0, B["glass_purple"])
+setb(0, 11, HZ0, B["ancient"])
+# techo con tragaluz
+fill(-HX - 1, WALL_TOP + 1, HZ0, HX + 1, WALL_TOP + 1, HZ1, "smooth_quartz")
+fill(-3, WALL_TOP + 1, HZ0 + 4, 3, WALL_TOP + 1, HZ1 - 4, "glass")
 
-# techo con artesonado de metal antiguo y luces
-fill(CX0 + 1, WALL_H + 1, CZ0 + 1, CX1 - 1, WALL_H + 1, CZ1 - 1, "polished_blackstone_bricks")
-for x in range(CX0 + 1, CX1):
-    for z in range(CZ0 + 1, CZ1):
-        if (x - CX0) % 4 == 0 or (z - CZ0) % 4 == 0: setb(x, WALL_H + 1, z, B["ancient"])
-        elif (x - CX0) % 4 == 2 and (z - CZ0) % 4 == 2: setb(x, WALL_H + 1, z, "shroomlight")
+# fachada frontal: pórtico con columnas, entablamento con luces, ventanales y puerta
+for x in range(-9, 10):
+    for z in range(-13, -9): setb(x, Y1, z, "smooth_quartz" if (x + z) % 2 else "quartz_bricks")
+for x in (-9, -6, -3, 3, 6, 9):
+    for y in range(Y1 + 1, Y1 + 7): setb(x, y, -10, "quartz_pillar[axis=y]")
+    setb(x, Y1 + 7, -10, "chiseled_quartz_block")
+    setb(x, Y1 + 5, -9, "red_wall_banner[facing=south]")
+fill(-9, Y1 + 8, -13, 9, Y1 + 8, -10, "smooth_quartz")
+for x in range(-9, 10):
+    setb(x, Y1 + 8, -10, B["lamp"] if x % 2 == 0 else "chiseled_quartz_block")
+    setb(x, Y1 + 9, -10, "red_nether_bricks")
+    setb(x, Y1 + 10, -10, "quartz_bricks")
+    setb(x, Y1 + 11, -10, B["qwall"])
+    setb(x, Y1 + 9, -11, "quartz_bricks"); setb(x, Y1 + 10, -11, "quartz_bricks")
+for x in range(-8, 9):
+    if abs(x) <= 2: continue
+    fill(x, Y1 + 1, HZ1, x, Y1 + 7, HZ1, "black_stained_glass_pane" if x % 3 else "quartz_pillar[axis=y]")
+fill(-2, Y1 + 1, HZ1, 2, Y1 + 5, HZ1, "air")
+fill(-2, Y1 + 6, HZ1, 2, Y1 + 6, HZ1, "chiseled_quartz_block")
 
-# fachada alta escalonada (pared oeste) con letrero CASINO iluminado
-def facade_top(z): return 15 if abs(z) >= 11 else 16 if abs(z) >= 7 else 17
-for z in range(-FACADE_Z, FACADE_Z + 1):
-    top = facade_top(z)
-    for y in range(WALL_H + 1, top + 1): setb(CX0, y, z, B["arg_brick"])
-    setb(CX0, top + 1, z, "gold_block")
-    setb(CX0 - 1, top, z, "polished_blackstone_brick_stairs[facing=east,half=top]")
-for z in (CZ0, CZ1):
-    for y in range(1, facade_top(z) + 1): setb(CX0, y, z, B["arg_col"])
-    setb(CX0, facade_top(z) + 1, z, B["lamp"])
-FONT = {
-    "C": ["###", "#..", "#..", "#..", "###"], "A": [".#.", "#.#", "###", "#.#", "#.#"],
-    "S": ["###", "#..", "###", "..#", "###"], "I": ["###", ".#.", ".#.", ".#.", "###"],
-    "N": ["#.#", "###", "###", "#.#", "#.#"], "O": ["###", "#.#", "#.#", "#.#", "###"],
-}
-LX0, LY = -11, 9    # letras: z de -11 a 11, filas y=9..13 (sobresalen 1 bloque al frente)
-fill(CX0 - 1, LY - 1, LX0 - 1, CX0 - 1, LY + 5, -LX0 + 1, "black_concrete")
-for z in range(LX0 - 1, -LX0 + 2):
-    setb(CX0 - 1, LY - 1, z, B["lamp"] if z % 2 == 0 else "gold_block")
-    setb(CX0 - 1, LY + 5, z, B["lamp"] if z % 2 == 0 else "gold_block")
-z = LX0
-for ch in "CASINO":
-    for r, row in enumerate(FONT[ch]):
-        for c, px in enumerate(row):
-            if px == "#": setb(CX0 - 1, LY + 4 - r, z + c, "gold_block")
-    z += 4
+# pabellones de las esquinas: marco blanco, ventanal alto, panel rojo ornamentado, balcón y agujas
+for sx in (-1, 1):
+    xa, xb = sorted((sx * PAV_X0, sx * PAV_X1))
+    fill(xa, Y1, PAV_Z0, xb, PAV_TOP, PAV_Z1, "bricks")
+    fill(xa, Y1, PAV_Z0, xb, Y1, PAV_Z1, "quartz_bricks")
+    for (x, z) in ((xa, PAV_Z1), (xb, PAV_Z1), (xa, PAV_Z0), (xb, PAV_Z0)):
+        for y in range(Y1, PAV_TOP + 1): setb(x, y, z, "quartz_pillar[axis=y]")
+    mid = sx * 13
+    for x in (mid - 1, mid, mid + 1):
+        fill(x, Y1 + 1, PAV_Z1, x, Y1 + 6, PAV_Z1, "light_gray_stained_glass")
+        fill(x, Y1 + 8, PAV_Z1, x, Y1 + 10, PAV_Z1, B["glass_red"])
+    for x in (mid - 2, mid + 2): fill(x, Y1 + 1, PAV_Z1, x, Y1 + 11, PAV_Z1, "quartz_bricks")
+    fill(mid - 2, Y1 + 7, PAV_Z1, mid + 2, Y1 + 7, PAV_Z1, "quartz_bricks")
+    fill(mid - 2, Y1 + 11, PAV_Z1, mid + 2, Y1 + 11, PAV_Z1, "quartz_bricks")
+    for x in range(mid - 2, mid + 3):
+        setb(x, Y1 + 7, PAV_Z1 + 1, "smooth_quartz_slab[type=top]")
+        setb(x, Y1 + 8, PAV_Z1 + 1, B["qwall"])
+    fill(xa - 1, PAV_TOP, PAV_Z0 - 1, xb + 1, PAV_TOP, PAV_Z1 + 1, "smooth_quartz")
+    for x in range(xa - 1, xb + 2):
+        for z in range(PAV_Z0 - 1, PAV_Z1 + 2):
+            if x in (xa - 1, xb + 1) or z in (PAV_Z0 - 1, PAV_Z1 + 1): setb(x, PAV_TOP + 1, z, B["qwall"])
+    for (x, z) in ((xa - 1, PAV_Z1 + 1), (xb + 1, PAV_Z1 + 1), (xa - 1, PAV_Z0 - 1), (xb + 1, PAV_Z0 - 1)):
+        setb(x, PAV_TOP + 1, z, "chiseled_quartz_block")
+        setb(x, PAV_TOP + 2, z, "quartz_pillar[axis=y]")
+        setb(x, PAV_TOP + 3, z, "end_rod[facing=up]"); setb(x, PAV_TOP + 4, z, "end_rod[facing=up]")
+    for x in range(xa, xb + 1): setb(x, Y1, PAV_Z1 + 1, "azalea_leaves[persistent=true]")
 
-# puerta 3x4 con marco de metal antiguo, marquesina con faroles y columnas
-fill(CX0, 1, -1, CX0, 4, 1, "air")
-for z in (-2, 2):
-    for y in range(1, 6): setb(CX0, y, z, B["ancient"])
-fill(CX0, 5, -2, CX0, 5, 2, B["ancient"])
-for x in range(CX0 - 4, CX0):
-    for z in range(-3, 4): setb(x, 6, z, "polished_blackstone_brick_slab[type=bottom]")
-    setb(x, 6, -4, "gold_block"); setb(x, 6, 4, "gold_block")
-for z in (-3, 3):
-    for y in range(1, 6): setb(CX0 - 4, y, z, B["arg_col"])
-for z in (-2, 0, 2): setb(CX0 - 3, 5, z, "lantern[hanging=true]")
-# alfombra roja desde la plaza hasta el altar
-for x in range(R + 1, 43): setb(x, 1, 0, "red_carpet")
+# ============================================================================================
+# 6. Interior
+for x in range(-HX, HX + 1):
+    for z in range(HZ0 + 1, HZ1):
+        if abs(x) <= 1: b = "red_nether_bricks"
+        elif abs(x) == 2: b = "gold_block"
+        else: b = "smooth_quartz" if (x + z) % 2 else "black_concrete"
+        setb(x, YC, z, b)
+for z in range(DESTINO[2] + 4, -9):
+    for x in (-1, 0, 1): setb(x, Y1, z, "red_carpet")
 
-# piso interior: tablero negro/gris con franjas doradas; pasillo central rojo
-for x in range(CX0 + 1, CX1):
-    for z in range(CZ0 + 1, CZ1):
-        if abs(z) == 2: b = "gold_block"
-        elif abs(z) <= 1: b = "red_nether_bricks"
-        else: b = "black_concrete" if (x + z) % 2 == 0 else "polished_blackstone"
-        setb(x, 0, z, b)
-
-# tragamonedas: base de acero negro, pantalla de esmeralda (+ palanca), cabezal de metal antiguo, farol arriba
+# tragamonedas contra las paredes laterales, mirando al centro
 MACHINES = []
-for x in MACHINE_X:
-    for (z, face, out) in ((CZ0 + 1, "south", 1), (CZ1 - 1, "north", -1)):
-        setb(x, 1, z, B["steel"])
-        setb(x, 2, z, "emerald_block")
-        setb(x, 3, z, B["ancient"])
-        setb(x, 4, z, B["lamp"])
-        for sx in (-1, 1):
-            for y in (1, 2, 3): setb(x + sx, y, z, B["steel_wall"])
-            setb(x + sx, 4, z, "end_rod[facing=up]")
-        setb(x, 2, z + out, f"lever[face=wall,facing={face}]")
-        setb(x, 1, z + 2 * out, "dark_oak_fence")
-        setb(x, 2, z + 2 * out, "red_carpet")
-        MACHINES.append([x, 2, z]); MACHINES.append([x, 2, z + out])
+for z in MACHINE_Z:
+    for (x, face, out) in ((-HX, "east", 1), (HX, "west", -1)):
+        setb(x, Y1, z, B["steel"])
+        setb(x, Y1 + 1, z, "emerald_block")
+        setb(x, Y1 + 2, z, B["ancient"])
+        setb(x, Y1 + 3, z, B["lamp"])
+        for sz in (-1, 1):
+            for y in range(Y1, Y1 + 3): setb(x, y, z + sz, B["steel_wall"])
+            setb(x, Y1 + 3, z + sz, "end_rod[facing=up]")
+        setb(x + out, Y1 + 1, z, f"lever[face=wall,facing={face}]")
+        setb(x + 2 * out, Y1, z, "dark_oak_fence"); setb(x + 2 * out, Y1 + 1, z, "red_carpet")
+        MACHINES.append([x, Y1 + 1, z]); MACHINES.append([x + out, Y1 + 1, z])
 
 # mesas de cartas (tapete verde) con sillas
-def card_table(cx, cz):
-    for x in range(cx - 1, cx + 2):
-        for z in (cz, cz + 1):
-            setb(x, 1, z, "dark_oak_slab[type=top]")
-            setb(x, 2, z, "green_carpet")
-    for x in range(cx - 1, cx + 2):
-        setb(x, 1, cz - 1, "dark_oak_stairs[facing=north]")
-        setb(x, 1, cz + 2, "dark_oak_stairs[facing=south]")
-    setb(cx - 2, 1, cz, "dark_oak_stairs[facing=west]"); setb(cx + 2, 1, cz + 1, "dark_oak_stairs[facing=east]")
-for cx in (30, 38):
-    card_table(cx, -6); card_table(cx, 5)
+def card_table(tx, tz):
+    for x in (tx, tx + 1):
+        for z in range(tz - 1, tz + 2):
+            setb(x, Y1, z, "dark_oak_slab[type=top]"); setb(x, Y1 + 1, z, "green_carpet")
+    for z in range(tz - 1, tz + 2):
+        setb(tx - 1, Y1, z, "dark_oak_stairs[facing=west]"); setb(tx + 2, Y1, z, "dark_oak_stairs[facing=east]")
+for tx in (-7, 6):
+    for tz in (-20, -26): card_table(tx, tz)
 
-# candelabros: cadena + cruz de oro + faroles colgantes
-for x in (26, 34, 42):
-    for z in (-6, 0, 6):
-        setb(x, WALL_H, z, "chain[axis=y]")
-        for (dx, dz) in ((0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)): setb(x + dx, WALL_H - 1, z + dz, "gold_block")
-        for (dx, dz) in ((1, 0), (-1, 0), (0, 1), (0, -1)): setb(x + dx, WALL_H - 2, z + dz, "lantern[hanging=true]")
+# candelabros
+for x in (-6, 0, 6):
+    for z in (-18, -24):
+        for y in (WALL_TOP, WALL_TOP - 1): setb(x, y, z, "chain[axis=y]")
+        for (dx, dz) in ((0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)): setb(x + dx, WALL_TOP - 2, z + dz, "gold_block")
+        for (dx, dz) in ((1, 0), (-1, 0), (0, 1), (0, -1)): setb(x + dx, WALL_TOP - 3, z + dz, "lantern[hanging=true]")
 
-# altar del Cofre del Destino: gradas de obsidiana, pilares, velas
-dx, dy, dz = DESTINO
-fill(dx - 2, 1, -3, dx + 2, 1, 3, B["obs_polished"])
-for z in range(-3, 4): setb(dx - 3, 1, z, CAT + "obsidian_brick_stairs[facing=east]")
-fill(dx - 1, 2, -2, dx + 1, 2, 2, B["obs_chiseled"])
-for z in range(-2, 3): setb(dx - 2, 2, z, CAT + "obsidian_brick_stairs[facing=east]")
-setb(dx, 2, dz, "crying_obsidian")
-setb(dx, dy, dz, "ender_chest[facing=west]")
-for z in (-4, 4):
-    for y in range(1, WALL_H + 1): setb(dx, y, z, B["obs_pillar"])
-for (x, z) in ((dx - 1, -2), (dx - 1, 2), (dx + 1, -2), (dx + 1, 2)): setb(x, 3, z, "purple_candle[candles=4,lit=true]")
-for z in (-2, 2): setb(dx, dy, z, "soul_lantern")
+# altar del Cofre del Destino al fondo
+dx_, dy_, dz_ = DESTINO
+fill(-3, Y1, dz_ - 2, 3, Y1, dz_ + 2, B["obs_polished"])
+for x in range(-3, 4): setb(x, Y1, dz_ + 3, B["obs_stairs"] + "[facing=north]")
+fill(-1, Y1 + 1, dz_ - 1, 1, Y1 + 1, dz_ + 1, B["obs_chiseled"])
+for x in range(-2, 3): setb(x, Y1 + 1, dz_ + 2, B["obs_stairs"] + "[facing=north]")
+setb(0, Y1 + 1, dz_, "crying_obsidian")
+setb(dx_, dy_, dz_, "ender_chest[facing=south]")
+for x in (-4, 4):
+    for y in range(Y1, WALL_TOP): setb(x, y, dz_, B["obs_pillar"])
+    sign(x, Y1 + 3, dz_ + 1, "south", ["COFRE DESTINO", "8 esmeraldas", "loot de cualquier", "estructura"], wood="dark_oak")
+for (x, z) in ((-1, dz_ - 1), (1, dz_ - 1), (-1, dz_ + 1), (1, dz_ + 1)): setb(x, Y1 + 2, z, "purple_candle[candles=4,lit=true]")
 
-# letreros de precios: junto a la puerta (mirando adentro) y en los pilares del altar
-sign(CX0 + 1, 3, -4, "east", ["TRAGAMONEDAS", "1 esmeralda", "clic en la palanca", "o la pantalla"])
-sign(CX0 + 1, 3, 4, "east", ["COFRE DESTINO", "8 esmeraldas", "al fondo, en", "el altar"])
-for z in (-4, 4):
-    sign(dx - 1, 4, z, "west", ["COFRE DESTINO", "8 esmeraldas", "loot de cualquier", "estructura"])
+# letreros de precios en la entrada y plantas en las esquinas
+sign_post(-3, Y1, HZ1 - 2, 0, ["TRAGAMONEDAS", "1 esmeralda", "clic en la palanca", "o la pantalla"], wood="dark_oak")
+sign_post(3, Y1, HZ1 - 2, 0, ["COFRE DESTINO", "8 esmeraldas", "al fondo, en", "el altar"], wood="dark_oak")
+for (x, z) in ((-HX, HZ0 + 1), (HX, HZ0 + 1)): setb(x, Y1, z, "potted_bamboo")
 
-# plantas en las esquinas interiores
-for (x, z) in ((CX0 + 1, CZ0 + 1), (CX0 + 1, CZ1 - 1), (CX1 - 1, CZ0 + 1), (CX1 - 1, CZ1 - 1)):
-    setb(x, 1, z, "potted_bamboo")
-
-cmds.append(f"setworldspawn ~{SPAWN[0]} ~{SPAWN[1]} ~{SPAWN[2]} {SPAWN_ANGLE}")
+wsx, wsz = rot_xz(SPAWN[0], SPAWN[2])
+cmds.append(f"setworldspawn ~{wsx} ~{SPAWN[1]} ~{wsz} {(SPAWN_ANGLE + 90 * ROT) % 360}")
 
 # ============================================================================================
 os.makedirs(os.path.dirname(OUT), exist_ok=True)
@@ -377,57 +364,61 @@ with open(OUT, "w", encoding="utf-8") as f:
     f.write("# Generado por scripts/gen-hub.py — no editar a mano\n")
     f.write("\n".join(cmds) + "\n")
 
-layout = dict(zone=ZONE, machines=MACHINES, destino=list(DESTINO), spawn=list(SPAWN))
+def rp(p): x, z = rot_xz(p[0], p[2]); return [x, p[1], z]
+corners = [rot_xz(min(fx) - SAFE_MARGIN, min(fz) - SAFE_MARGIN), rot_xz(max(fx) + SAFE_MARGIN, max(fz) + SAFE_MARGIN)]
+ZONE = dict(minX=min(c[0] for c in corners), maxX=max(c[0] for c in corners),
+            minZ=min(c[1] for c in corners), maxZ=max(c[1] for c in corners))
+bc = [rot_xz(min(fx) - BLEND, min(fz) - BLEND), rot_xz(max(fx) + BLEND, max(fz) + BLEND)]
+BOUNDS = dict(minX=min(c[0] for c in bc), maxX=max(c[0] for c in bc), minZ=min(c[1] for c in bc), maxZ=max(c[1] for c in bc))
+layout = dict(rot=ROT, zone=ZONE, bounds=BOUNDS, machines=[rp(m) for m in MACHINES], destino=rp(DESTINO), spawn=rp(SPAWN))
 with open(LAYOUT_JS, "w", encoding="utf-8") as f:
-    f.write("// priority: 100\n// Generado por scripts/gen-hub.py — no editar a mano. Coordenadas relativas al origen del hub.\n")
+    f.write("// priority: 100\n// Generado por scripts/gen-hub.py — no editar a mano. Coordenadas relativas al origen del hub (ya rotadas).\n")
     f.write("global.HUB_LAYOUT = " + json.dumps(layout) + "\n")
-print(f"{OUT}: {len(cmds)} comandos; {len(MACHINES)//2} tragamonedas")
+print(f"{OUT}: {len(cmds)} comandos; {len(MACHINES)//2} tragamonedas; rot={ROT}")
 
-# --- Vista previa opcional: planta (techo quitado dentro del casino) + fachada, como HTML ---
+# --- Vista previa opcional (coordenadas locales): alzado frontal + planta, como HTML ---
 if "--preview" in sys.argv:
     out_dir = sys.argv[sys.argv.index("--preview") + 1]
-    COL = [("lamp", "#f0a020"), ("lantern", "#ffcc55"), ("shroomlight", "#ff9944"), ("gold", "#e8c030"), ("ancient", "#c9a050"), ("sea_lantern", "#cfeff0"),
-           ("emerald", "#20c060"), ("lever", "#999"), ("water", "#3060e0"), ("azure", "#a8d8e0"), ("sea_lantern", "#cfeff0"),
-           ("cherry_leaves", "#f2a8c8"), ("cherry_log", "#5a2c36"), ("petals", "#f7b0d0"), ("azalea", "#4f8a2f"),
-           ("grass", "#5d9b3a"), ("allium", "#b070e0"), ("tulip", "#f090b0"), ("valley", "#eee"), ("bluet", "#ddd"),
-           ("scarlet", "#b01828"), ("purple_stained", "#8030c0"), ("purple_candle", "#a050e0"), ("crying", "#5020a0"),
-           ("ender_chest", "#204040"), ("obsidian", "#2a1a40"), ("steel", "#30343a"), ("end_rod", "#fff"),
-           ("red_carpet", "#c02020"), ("red_nether", "#5a1010"), ("green_carpet", "#2a7a2a"), ("dark_oak", "#4a3018"),
-           ("black_concrete", "#111"), ("polished_blackstone", "#2a2630"), ("argillite", "#24222a"), ("deepslate", "#4a4a50"),
-           ("chiseled_stone", "#8a8a8a"), ("cracked", "#7a7a7a"), ("stone_tile", "#9a9a98"), ("stone_pillar", "#b0b0ae"),
-           ("stone_bricks", "#838383"), ("sign", "#6b4a2a"), ("bamboo", "#6a9a30"), ("chain", "#555"), ("mural", "#7fb8c8")]
+    COL = [("lamp", "#f0a020"), ("lantern", "#ffcc55"), ("gold", "#e8c030"), ("ancient", "#c9a050"),
+           ("emerald", "#20c060"), ("lever", "#999"), ("water", "#3060e0"), ("lily", "#2f7a2f"), ("scarlet", "#c01830"),
+           ("purple_stained", "#8030c0"), ("purple_candle", "#a050e0"), ("crying", "#5020a0"), ("ender_chest", "#204040"),
+           ("obsidian", "#2a1a40"), ("steel", "#30343a"), ("end_rod", "#fff"), ("red_carpet", "#c02020"), ("red_nether", "#6a1010"),
+           ("red_wall_banner", "#c02020"), ("green_carpet", "#2a7a2a"), ("dark_oak", "#4a3018"), ("spruce", "#6b4c2a"),
+           ("black_concrete", "#111"), ("black_stained", "#222a30"), ("light_gray_stained", "#c8d0d8"), ("white_stained", "#e8f0f8"),
+           ("glass", "#cfe8f0"), ("quartz", "#f2eee6"), ("bricks", "#a8473a"), ("flowering", "#5f8f3a"), ("leaves", "#3f7a2a"),
+           ("poppy", "#d02020"), ("tulip", "#e03030"), ("dandelion", "#f0e040"), ("daisy", "#eee"), ("cornflower", "#4060e0"),
+           ("grass_block", "#5d9b3a"), ("grass", "#6aaa40"), ("dirt_path", "#a08850"), ("dirt", "#7a5a3a"), ("clay", "#9aa0b0"),
+           ("andesite", "#8a8a8a"), ("stone", "#7d7d7d"), ("banner", "#60b0f0"), ("bamboo", "#6a9a30"), ("chain", "#555"),
+           ("fence", "#6b4c2a"), ("sign", "#6b4a2a")]
     def color(b):
         for k, c in COL:
             if k in b: return c
         return "#f0f"
     xs = [p[0] for p in W]; zs = [p[2] for p in W]
     x0, x1, z0, z1 = min(xs), max(xs), min(zs), max(zs)
-    def top_block(x, z):
-        ys = [y for (a, y, c) in W if a == x and c == z]
-        if not ys: return None
-        inside = CX0 < x < CX1 and CZ0 < z < CZ1
-        if inside: ys = [y for y in ys if y < WALL_H - 1] or ys   # quita techo y candelabros para ver el interior
-        return W[(x, max(ys), z)]
-    S = 10
+    top = {}
+    for (x, y, z), b in W.items():
+        if -HX <= x <= HX and HZ0 < z < HZ1 and y >= WALL_TOP - 3: continue   # sin techo: se ve el interior
+        if (x, z) not in top or y > top[(x, z)][0]: top[(x, z)] = (y, b)
+    S = 8
     cells = []
-    for z in range(z0, z1 + 1):
-        for x in range(x0, x1 + 1):
-            b = top_block(x, z)
-            if b: cells.append(f'<rect x="{(x - x0) * S}" y="{(z - z0) * S}" width="{S}" height="{S}" fill="{color(b)}"/>')
-    plan = f'<svg width="{(x1 - x0 + 1) * S}" height="{(z1 - z0 + 1) * S}">' + "".join(cells) + "</svg>"
-    # fachada vista desde el oeste (primer bloque no-aire desde x=CX0-6 hacia el este)
+    for (x, z), (y, b) in top.items():
+        shade = 0.55 + 0.45 * min(1, max(0, (y + 2) / 26))
+        cells.append(f'<rect x="{(x - x0) * S}" y="{(z - z0) * S}" width="{S}" height="{S}" fill="{color(b)}" opacity="{shade:.2f}"/>')
+    plan = f'<svg width="{(x1 - x0 + 1) * S}" height="{(z1 - z0 + 1) * S}" style="background:#000">' + "".join(cells) + "</svg>"
     fc = []
-    for y in range(0, 18):
-        for z in range(-14, 15):
-            for x in range(CX0 - 6, CX1 + 1):
+    ymax = max(p[1] for p in W)
+    for y in range(-1, ymax + 1):
+        for x in range(x0, x1 + 1):
+            for z in range(z1, z0 - 1, -1):
                 b = W.get((x, y, z))
                 if b:
-                    fc.append(f'<rect x="{(z + 14) * S}" y="{(17 - y) * S}" width="{S}" height="{S}" fill="{color(b)}"/>'); break
-    facade = f'<svg width="{29 * S}" height="{18 * S}">' + "".join(fc) + "</svg>"
+                    fc.append(f'<rect x="{(x - x0) * S}" y="{(ymax - y) * S}" width="{S}" height="{S}" fill="{color(b)}"/>'); break
+    facade = f'<svg width="{(x1 - x0 + 1) * S}" height="{(ymax + 2) * S}">' + "".join(fc) + "</svg>"
     os.makedirs(out_dir, exist_ok=True)
     with open(os.path.join(out_dir, "hub-preview.html"), "w") as f:
-        f.write('<html><body style="background:#5d9b3a;margin:0;padding:10px;font:14px sans-serif">'
-                f'<div>Planta (norte arriba, casino a la derecha; sin techo)</div>{plan}'
-                f'<div style="margin-top:12px">Fachada del casino (vista desde el oeste)</div><div style="background:#8ec5f0;display:inline-block">{facade}</div></body></html>')
+        f.write('<html><body style="background:#8ec5f0;margin:0;padding:10px;font:14px sans-serif">'
+                f'<div>Alzado frontal (desde el lobby)</div>{facade}'
+                f'<div style="margin-top:12px">Planta (casino arriba, lobby abajo; sin techo; más oscuro = más bajo)</div>{plan}</body></html>')
     unknown = sorted({b for b in W.values() if color(b) == "#f0f"})
     if unknown: print("sin color en la vista previa:", unknown)
