@@ -121,3 +121,14 @@ Backup del mundo v1.0: `backups/world-v1.0-20261007-224531/` (+ .tar.gz). Mundo 
   Verificado: guardar → restaurar deja el mundo idéntico.
 - `dist/banner/banner-instalacion.png` (+ .html fuente): instalación con Modrinth App o launcher oficial + IP del server.
 - `dist/banner/banner-roadmap.png` (+ .html): qué hay en el server, qué viene (plan pendiente) y preguntas de feedback.
+
+## 2026-10-10 — Lobby y casino rediseñados
+- `scripts/gen-hub.py` reescrito (4369 comandos). Bloques de Cataclysm y Born in Chaos (los tienen todos los clientes).
+  - Plaza octogonal: arcos de entrada, fuente de piedra marina azul con cascada, 4 jardines con cerezo, bancos,
+    faroles de argilita, tablero de reglas con murales. Spawn al sur de la fuente mirando al norte (`0 1 9`, ángulo 180).
+  - Casino 29×25: fachada escalonada negra/dorada con letrero CASINO iluminado, marquesina, ventanales escarlata,
+    rosetón morado, artesonado con luces, candelabros, 4 mesas de cartas, 8 tragamonedas (antes 6) y altar de obsidiana
+    para el Cofre del Destino (ahora en `46 3 0`). Zona segura: x -25..58, z ±25.
+- `python3 scripts/gen-hub.py --preview <dir>`: planta + fachada en HTML para revisar sin entrar al juego.
+- Verificado en el server: la función carga, `/hub construir` OK, 19 bloques clave comprobados con `execute if block`,
+  `/casino validar` OK. Plantilla nueva: `lobby-v2` (la usa `plantilla.sh restaurar` por defecto).

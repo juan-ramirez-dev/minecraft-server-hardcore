@@ -41,4 +41,5 @@ Al terminar **cada** cambio pedido: commit + push a `origin main` con la **cuent
 - Disco **exFAT**: macOS crea `._*` que rompen Forge/KubeJS. Copiar con `cp -X`; los scripts de arranque los limpian.
 - Un solo sistema de escalado de dificultad (Improved Mobs). Respetar la lista de mods descartados del plan.
 - Al agregar/quitar mods: actualizar `modrinth-mods.json`, `client-only.txt` si aplica, y `CHANGELOG.md`.
+- Construcciones (gen-hub.py): solo bloques vanilla o de mods que tienen los clientes; nunca de `pack/server-only/`.
 - No tocar `/Volumes/Z Slim/minecraft/` (otro server).
