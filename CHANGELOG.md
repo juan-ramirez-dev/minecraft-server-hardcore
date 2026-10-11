@@ -217,3 +217,15 @@ Muertes del mundo anterior (logs): Dread Hound, Nightmare Stalker (×2, además 
 
 ## 2026-10-10 — Whitelist
 - + daniel997608 (UUID offline `272a4bea-dd41-3750-9d4a-0b78a75001cc`).
+
+## 2026-10-10 — Spawners de mazmorras sueltan mobs de mods en cualquier fase + mundo nuevo (semilla 3)
+- `progression.js`: los mobs de Born in Chaos, Mowzie's y Cataclysm bloqueados por fase solo se filtran cuando aparecen
+  solos por el mundo (NATURAL, CHUNK_GENERATION, PATROL, REINFORCEMENT, EVENT, JOCKEY). Si salen de un spawner o de una
+  estructura (`SPAWNER`, `STRUCTURE`), `checkSpawn` les pone la marca `prog_estructura` y salen aunque la fase sea baja.
+  BiC además se cancela en `spawned` si no trae la marca (algunos de sus mobs aparecen sin pasar por `checkSpawn`).
+  Las variantes `_not_despawn` de BiC (las de estructuras) se permiten siempre.
+  - Verificado en el código de Architectury: `checkSpawn` = `MobSpawnEvent.FinalizeSpawn` de Forge (incluye spawners).
+  - **Sin probar en vivo**: un spawner necesita un jugador conectado para activarse y no había nadie.
+- Mundo nuevo: semilla `-2339229799762738934` (respaldo del anterior: `backups/antes-de-reset-world-20261010-191551.tar.gz`).
+  Hub + casino en `-72 86 -400` (spawn `-72 87 -383`): lobby llano en un bosque de abedules, casino con la montaña detrás
+  y un río al sur. `/casino validar` OK, vista aérea revisada. Fase 0, dificultad 0. Plantilla: `semilla3-v1`.

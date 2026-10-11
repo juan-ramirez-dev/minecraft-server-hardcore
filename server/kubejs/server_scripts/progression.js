@@ -1,6 +1,6 @@
 // Progresión por fases: el mundo empieza como Minecraft vanilla y se endurece a medida que el grupo avanza.
 // La fase solo sube (nunca baja) y es global: basta con que UN jugador cumpla el hito.
-//   0 Vanilla    inicio                      → solo mobs vanilla, sin Champions, sin Eventos del Caos, sin lunas de sangre
+//   0 Vanilla    inicio                      → solo mobs vanilla por el mundo (los spawners de mazmorras sí sueltan mobs de mods), sin Champions, sin Eventos del Caos, sin lunas de sangre
 //   1 Despertar  primer diamante             → Mowzie's (sin Frostmaw), Born in Chaos "ligeros", eventos del caos suaves
 //   2 Infierno   entrar al Nether            → casi todo Born in Chaos, Cataclysm natural, Champions, lunas de sangre, todos los eventos
 //   3 Ojo        seguir un Ojo de Ender o matar al Wither → élites de Born in Chaos y Frostmaw
@@ -49,7 +49,7 @@ const PROG_BIC_ELITES = ['nightmare_stalker', 'dread_hound', 'dire_hound_leader'
   'lifestealer_true_form', 'supreme_bonescaller', 'krampus', 'krampus_henchman', 'sir_pumpkinhead', 'sir_pumpkinhead_without_horse',
   'lord_pumpkinhead', 'lord_pumpkinhead_withouta_horse', 'spiritof_chaos', 'missioner', 'missionary_raider', 'scarlet_persecutor',
   'sir_the_headless', 'mother_spider', 'skeleton_demoman']
-// Spawns "salvajes" (no de estructuras ni spawners) que se filtran para Mowzie's y Cataclysm
+// Spawns "salvajes" (no de estructuras ni spawners): los únicos que se filtran
 const PROG_SPAWN_SALVAJE = ['NATURAL', 'CHUNK_GENERATION', 'PATROL', 'REINFORCEMENT', 'EVENT', 'JOCKEY']
 
 function progState(server) {
@@ -123,14 +123,41 @@ EntityEvents.death(e => {
   if (id == 'minecraft:wither') progSetFase(server, 3, 'El Wither fue derrotado.')
 })
 
-// Born in Chaos: bloquear por fase (cualquier forma de aparecer; los aliados "controlled" siempre se permiten)
+// Mobs de mods bloqueados por fase SOLO cuando aparecen solos por el mundo. Los de spawners y estructuras (mazmorras,
+// criptas…) siempre salen: checkSpawn los marca con PROG_TAG_OK y esa marca se guarda con el mob.
+// Born in Chaos además se filtra en spawned (por defecto se cancela lo que no venga marcado), porque algunos de sus mobs
+// aparecen por caminos propios del mod sin pasar por checkSpawn. Aliados "controlled" y variantes "_not_despawn"
+// (las de estructuras) siempre se permiten.
+const PROG_TAG_OK = 'prog_estructura'
+const PROG_SPAWN_ESTRUCTURA = ['SPAWNER', 'STRUCTURE', 'TRIAL_SPAWNER']
+
 function progBicFase(id) {
-  var base = id.substring(id.indexOf(':') + 1).replace(/_not_despawn$/, '').replace(/_copy$/, '')
-  if (base.indexOf('controlled') >= 0) return 0
+  var base = id.substring(id.indexOf(':') + 1)
+  if (base.indexOf('controlled') >= 0 || base.endsWith('_not_despawn')) return 0
+  base = base.replace(/_copy$/, '')
   if (PROG_BIC_LIGEROS.indexOf(base) >= 0) return 1
   if (PROG_BIC_ELITES.indexOf(base) >= 0) return 3
   return 2
 }
+// Fase desde la que un mob de mod puede aparecer solo por el mundo (0 = siempre / no es de un mod filtrado)
+function progModFase(id) {
+  if (id.startsWith('born_in_chaos_v1:')) return progBicFase(id)
+  if (id.startsWith('cataclysm:')) return 2
+  if (id.startsWith('mowziesmobs:')) return id == 'mowziesmobs:frostmaw' ? 3 : 1
+  return 0
+}
+
+EntityEvents.checkSpawn(e => {
+  var m = e.entity
+  var id = String(m.type)
+  var desde = progModFase(id)
+  if (desde == 0) return
+  var tipo = String(e.type)
+  if (PROG_SPAWN_ESTRUCTURA.indexOf(tipo) >= 0) { m.addTag(PROG_TAG_OK); return }
+  if (PROG_SPAWN_SALVAJE.indexOf(tipo) < 0) return
+  if (global.progFase(e.server) >= desde) return
+  e.cancel()
+})
 
 EntityEvents.spawned(e => {
   var m = e.entity
@@ -144,19 +171,7 @@ EntityEvents.spawned(e => {
     server.scheduleInTicks(1, () => server.runCommandSilent(`champions remove ${uuid}`))
   }
   var id = String(m.type)
-  if (!id.startsWith('born_in_chaos_v1:') || progBicFase(id) <= fase) return
-  e.cancel()
-})
-
-// Mowzie's y Cataclysm: solo se filtran los spawns naturales (sus estructuras y jefes siguen intactos)
-EntityEvents.checkSpawn(e => {
-  var id = String(e.entity.type)
-  var mowzie = id.startsWith('mowziesmobs:'), cata = id.startsWith('cataclysm:')
-  if (!mowzie && !cata) return
-  if (PROG_SPAWN_SALVAJE.indexOf(String(e.type)) < 0) return
-  var fase = global.progFase(e.server)
-  var desde = cata ? 2 : (id == 'mowziesmobs:frostmaw' ? 3 : 1)
-  if (fase >= desde) return
+  if (!id.startsWith('born_in_chaos_v1:') || progBicFase(id) <= fase || m.getTags().contains(PROG_TAG_OK)) return
   e.cancel()
 })
 
