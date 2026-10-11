@@ -236,3 +236,10 @@ Muertes del mundo anterior (logs): Dread Hound, Nightmare Stalker (×2, además 
   `/casino validar` OK, vista aérea revisada, fase 0 / dificultad 0. Plantilla: `semilla4-v1`.
 - Whitelist: + Belcebu232. `whitelist add` puso su UUID premium; se cambió a mano por el offline
   (`a90425d2-a6ad-31a0-a645-93f93584fd00`, `OfflinePlayer:<nombre>`), si no, no podría entrar en modo no premium.
+
+## 2026-10-10 — Mundo nuevo (semilla 5): bosque normal, relieve suave
+- Pedido: bosque normal, no todo plano pero fácil de recorrer. Se probaron 6 semillas (arranque + `/hub altura` del spawn,
+  puntuando bosque, relieve de ~5 bloques de desviación en 128 bloques y poca agua). Una sabana se descartó a pedido del usuario.
+- Semilla `445097520101057440` (respaldo del mundo jugado anterior: `backups/antes-de-reset-world-20261010-231206.tar.gz`).
+  Hub + casino en `96 67 -152` (spawn `96 68 -135`): bosque de robles/abedules con tulipanes y pradera abierta al norte;
+  casino ~3 bloques sobre el lobby. `/casino validar` OK, vista aérea revisada, fase 0 / dificultad 0. Plantilla: `semilla5-v1`.
