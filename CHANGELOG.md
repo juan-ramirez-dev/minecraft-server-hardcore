@@ -255,3 +255,12 @@ Muertes del mundo anterior (logs): Dread Hound, Nightmare Stalker (×2, además 
 ## 2026-10-10 — Whitelist: + Gostiewe
 - `whitelist add` lo registró en minúsculas (`gostiewe`). En modo no premium el UUID depende de mayúsculas, así que quedan
   las dos entradas con su UUID offline: `Gostiewe` (`1c51a323-…`) y `gostiewe` (`7afe7620-…`).
+
+## 2026-10-11 — 3 vidas por jugador
+- `lives.js` (nuevo): cada jugador tiene 3 vidas. Las 2 primeras muertes reaparecen en supervivencia (cama o spawn) con
+  resistencia/regeneración 10 s; la 3ª es la definitiva y sigue el flujo de siempre (espectador + Cofre del Alma / `/revivir`).
+  Se mantiene `hardcore=true` (el server pone espectador tras el respawn y `lives.js` lo pasa a supervivencia 3 ticks después,
+  con respaldo cada 1 s). Sin reinicio: aplicado con `reload`.
+- `soul_chest.js`: el handler de muerte llama a `global.vidasMuerte` y solo cuenta la muerte definitiva.
+- Revividos (`/revivir`, Cofre del Alma) vuelven con 1 vida. Nuevo `/vidas <jugador> [n]` (consola).
+- Migración única (`vidas_v1`): los muertos al activarlo (thisMonje, daniel997608, Belcebu232) revividos donde murieron con 3 vidas.

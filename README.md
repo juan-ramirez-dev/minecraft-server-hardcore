@@ -10,6 +10,7 @@ sube con el tiempo y con cada jefe, Nether y End mucho más peligrosos, y mecán
 - **Casino**: tragamonedas (1 esmeralda) y Cofre del Destino (8 esmeraldas) con premios de cualquier mod.
 - **Eventos del Caos**: de vez en cuando todo se pone peor por unos minutos (creepers cargados, plaga de arañas, asedios,
   phantoms, francotiradores…) y cada 2 lunas llenas, **Furia de la Luna**.
+- **3 vidas**: las 2 primeras muertes reaparecen solas (cama o spawn); la 3ª es definitiva (espectador). Un revivido vuelve con 1 vida.
 - **Cofre del Alma**: si alguien muere, aparece un cofre (normalmente en una Ciudad Antigua) con un ítem para revivirlo.
 - **Espectador restringido**: los muertos solo ven a través de los ojos de un jugador vivo.
 - **Alertas en el chat**: aviso cuando alguien queda con ≤ 3 ❤ o usa un Tótem de la Inmortalidad.
@@ -60,6 +61,7 @@ Pack para jugadores: `python3 scripts/build-mrpack.py 1.1.0` → `dist/Hardcore-
 | `/fase` · `/fase set <n>` · `/fase extra <n>` | Fase de progresión (0–4) · forzar fase · fijar el extra de dificultad |
 | `/caos iniciar <evento>` · `/caos parar` · `/caos estado` · `/caos activar\|desactivar` | Eventos del Caos |
 | `/alma forzar` · `/alma reserva` · `/alma estado` · `/alma cancelar` · `/alma dar <jugador>` | Cofre del Alma (`reserva`: el periódico, sin muertos) |
+| `/vidas <jugador> [n]` | Ver o fijar las vidas restantes (0–3) |
 | `/revivir <jugador> [muerte\|<otro jugador>]` | Revive donde murió o junto a otro; si no está conectado queda pendiente hasta que entre |
 | `/tag <jugador> add espectador_libre` | Libera a un admin del espectador restringido |
 
