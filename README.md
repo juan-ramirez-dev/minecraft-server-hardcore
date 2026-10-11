@@ -45,7 +45,7 @@ No se versionan: mundos, backups, JDK, librerías de Forge, jars de mods ni dato
 5. Arrancar: `scripts/launch-detached.sh` (tmux `mc-hardcore`). Consola: `scripts/console.sh`. Comando suelto: `scripts/cmd.sh "list"`.
 6. Primera vez en un mundo nuevo (como op): `/hub construir`, `/op <admin>`, `/whitelist add <jugador>`, y las gamerules del CHANGELOG.
 
-Reiniciar el mundo de prueba (server apagado): `scripts/plantilla.sh restaurar` → vuelve a la plantilla más reciente (`semilla3-v1`)
+Reiniciar el mundo de prueba (server apagado): `scripts/plantilla.sh restaurar` → vuelve a la plantilla más reciente (`semilla4-v1`)
 (hub + casino listos, sin jugadores). Guardar otra: `scripts/plantilla.sh guardar <nombre>`.
 
 Pack para jugadores: `python3 scripts/build-mrpack.py 1.1.0` → `dist/Hardcore-Coop-1.1.0.mrpack` (+ zip de mods).
@@ -54,7 +54,7 @@ Pack para jugadores: `python3 scripts/build-mrpack.py 1.1.0` → `dist/Hardcore-
 
 | Comando | Qué hace |
 |---|---|
-| `/hub construir` · `/hub construir_en <x y z>` · `/hub info` | Construye/repara el lobby + casino (hoy en la ladera de un bosque de abedules: `-72 86 -400`) |
+| `/hub construir` · `/hub construir_en <x y z>` · `/hub info` | Construye/repara el lobby + casino (hoy en un bosque de abedules: `56 63 136`) |
 | `/hub altura <x> <z> <radio> <paso>` · `/hub volcar <x> <z> <radio>` | Exporta relieve/biomas o bloques de superficie a `kubejs/exported/` |
 | `/casino validar` · `/casino prueba <n>` | Verifica ítems/tablas de loot · simula tiradas |
 | `/fase` · `/fase set <n>` · `/fase extra <n>` | Fase de progresión (0–4) · forzar fase · fijar el extra de dificultad |

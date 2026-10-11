@@ -229,3 +229,10 @@ Muertes del mundo anterior (logs): Dread Hound, Nightmare Stalker (×2, además 
 - Mundo nuevo: semilla `-2339229799762738934` (respaldo del anterior: `backups/antes-de-reset-world-20261010-191551.tar.gz`).
   Hub + casino en `-72 86 -400` (spawn `-72 87 -383`): lobby llano en un bosque de abedules, casino con la montaña detrás
   y un río al sur. `/casino validar` OK, vista aérea revisada. Fase 0, dificultad 0. Plantilla: `semilla3-v1`.
+
+## 2026-10-10 — Mundo nuevo (semilla 4) + whitelist
+- Semilla `-1764829296022112824` (respaldo del anterior en `backups/antes-de-reset-world-20261010-222159.tar.gz`).
+  Hub + casino en `56 63 136` (spawn `56 64 153`), bosque de abedules con el casino ~4 bloques sobre el lobby.
+  `/casino validar` OK, vista aérea revisada, fase 0 / dificultad 0. Plantilla: `semilla4-v1`.
+- Whitelist: + Belcebu232. `whitelist add` puso su UUID premium; se cambió a mano por el offline
+  (`a90425d2-a6ad-31a0-a645-93f93584fd00`, `OfflinePlayer:<nombre>`), si no, no podría entrar en modo no premium.
