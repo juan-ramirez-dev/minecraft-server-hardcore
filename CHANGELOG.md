@@ -251,3 +251,7 @@ Muertes del mundo anterior (logs): Dread Hound, Nightmare Stalker (×2, además 
   (`persistentData.revivir`) y se aplica solo cuando aparece como espectador.
 - Primer uso: thisMonje (creeper, `198 67 -139`, se desconectó en la pantalla de muerte) → pendiente.
 - Verificado: carga sin errores; los mensajes "pendiente" y "no está muerto". Sin probar: el revivir en sí (nadie muerto conectado).
+
+## 2026-10-10 — Whitelist: + Gostiewe
+- `whitelist add` lo registró en minúsculas (`gostiewe`). En modo no premium el UUID depende de mayúsculas, así que quedan
+  las dos entradas con su UUID offline: `Gostiewe` (`1c51a323-…`) y `gostiewe` (`7afe7620-…`).
