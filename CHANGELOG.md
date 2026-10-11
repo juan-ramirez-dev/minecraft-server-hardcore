@@ -264,3 +264,6 @@ Muertes del mundo anterior (logs): Dread Hound, Nightmare Stalker (×2, además 
 - `soul_chest.js`: el handler de muerte llama a `global.vidasMuerte` y solo cuenta la muerte definitiva.
 - Revividos (`/revivir`, Cofre del Alma) vuelven con 1 vida. Nuevo `/vidas <jugador> [n]` (consola).
 - Migración única (`vidas_v1`): los muertos al activarlo (thisMonje, daniel997608, Belcebu232) revividos donde murieron con 3 vidas.
+
+## 2026-10-11 — Whitelist: + elCrisbb
+- UUID offline `6fe53194-4c01-3fea-9d72-69c580cb6632` (`OfflinePlayer:elCrisbb`, coincide con su intento de entrada rechazado).
