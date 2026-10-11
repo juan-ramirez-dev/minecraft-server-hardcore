@@ -60,6 +60,7 @@ Pack para jugadores: `python3 scripts/build-mrpack.py 1.1.0` → `dist/Hardcore-
 | `/fase` · `/fase set <n>` · `/fase extra <n>` | Fase de progresión (0–4) · forzar fase · fijar el extra de dificultad |
 | `/caos iniciar <evento>` · `/caos parar` · `/caos estado` · `/caos activar\|desactivar` | Eventos del Caos |
 | `/alma forzar` · `/alma reserva` · `/alma estado` · `/alma cancelar` · `/alma dar <jugador>` | Cofre del Alma (`reserva`: el periódico, sin muertos) |
+| `/revivir <jugador> [muerte\|<otro jugador>]` | Revive donde murió o junto a otro; si no está conectado queda pendiente hasta que entre |
 | `/tag <jugador> add espectador_libre` | Libera a un admin del espectador restringido |
 
 ## Notas

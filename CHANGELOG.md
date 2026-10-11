@@ -243,3 +243,11 @@ Muertes del mundo anterior (logs): Dread Hound, Nightmare Stalker (×2, además 
 - Semilla `445097520101057440` (respaldo del mundo jugado anterior: `backups/antes-de-reset-world-20261010-231206.tar.gz`).
   Hub + casino en `96 67 -152` (spawn `96 68 -135`): bosque de robles/abedules con tulipanes y pradera abierta al norte;
   casino ~3 bloques sobre el lobby. `/casino validar` OK, vista aérea revisada, fase 0 / dificultad 0. Plantilla: `semilla5-v1`.
+
+## 2026-10-10 — /revivir con pendientes
+- `revivir.js` (nuevo): `/revivir <jugador> [muerte|<otro jugador>]` (consola). Por defecto lo revive donde murió
+  (`LastDeathLocation`). Pasa a supervivencia antes del tp (si no, la cámara de espectador lo arrastra), con regeneración y
+  resistencia al fuego 10 s. Si el muerto no está conectado o sigue en la pantalla de muerte, queda pendiente
+  (`persistentData.revivir`) y se aplica solo cuando aparece como espectador.
+- Primer uso: thisMonje (creeper, `198 67 -139`, se desconectó en la pantalla de muerte) → pendiente.
+- Verificado: carga sin errores; los mensajes "pendiente" y "no está muerto". Sin probar: el revivir en sí (nadie muerto conectado).
