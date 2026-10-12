@@ -117,9 +117,9 @@ function almaFloorSpot(level, cx, cz, yMin, yMax, radius) {
 }
 
 // Estructura peligrosa cercana a (x, z): devuelve { box, spawners, name } o null
-function almaFindHardStructure(level, x, z) {
+function almaFindHardStructure(level, x, z, forcedId) {
   var ids = Object.keys(ALMA_HARD)
-  var id = ids[Math.floor(Math.random() * ids.length)]
+  var id = forcedId || ids[Math.floor(Math.random() * ids.length)]
   try {
     var reg = level.registryAccess().registryOrThrow($AlmaRegistries.STRUCTURE)
     var holder = reg.getHolderOrThrow($AlmaResourceKey.create($AlmaRegistries.STRUCTURE, new $AlmaRL(id)))
@@ -144,7 +144,7 @@ function almaFindHardStructure(level, x, z) {
         }
       }
     }
-    return { box: b, spawners: spawners, name: ALMA_HARD[id], id: id }
+    return { box: b, spawners: spawners, name: ALMA_HARD[id] || id, id: id }
   } catch (err) {
     console.error('Cofre del Alma: no se pudo buscar ' + id + ' (' + x + ', ' + z + '): ' + err)
     return null
@@ -174,6 +174,13 @@ function almaBuildVault(server, x, z) {
   almaCmd(server, `${d}setblock ${x} ${y + 3} ${z} minecraft:soul_lantern[hanging=true]`)
   return [x, y, z]
 }
+
+// Lo reutiliza supply_chest.js
+global.almaEstructuras = ALMA_HARD
+global.almaCenter = almaCenter
+global.almaFindStructure = almaFindHardStructure
+global.almaHardSpot = almaHardSpot
+global.almaBuildVault = almaBuildVault
 
 function almaSpawnChest(server, reserva) {
   var level = server.overworld()

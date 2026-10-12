@@ -267,3 +267,15 @@ Muertes del mundo anterior (logs): Dread Hound, Nightmare Stalker (×2, además 
 
 ## 2026-10-11 — Whitelist: + elCrisbb
 - UUID offline `6fe53194-4c01-3fea-9d72-69c580cb6632` (`OfflinePlayer:elCrisbb`, coincide con su intento de entrada rechazado).
+
+## 2026-10-12 — Cofre de Suministros (botín según dificultad)
+- `supply_chest.js` (nuevo): con alguien conectado y **nadie conectado muerto**, cada 45–75 min de ese tiempo aparece un cofre
+  dentro de una estructura (junto a un spawner si tiene), lejos de los vivos. Coordenadas en chat + bossbar; dura 30 min; si lo
+  vacían se anuncia y termina (solo se revisa con alguien a ≤ 48 bloques, para no cargar el chunk).
+- Tier según la dificultad de `progression.js` (pisos 0/10/30/60/100): común (hierro, libros II, manzanas doradas) → poco común
+  (diamante, libros III, totem raro) → raro (totem fijo, diamante Prot III, libros IV, mending, chatarra de netherite) → épico
+  (manzana encantada, Prot IV, netherite, plantilla) → legendario (netherite encantado con mending, 2+ totems). Tiers 0–1 en
+  estructuras suaves (mazmorras, criptas, mausoleo, puesto de saqueadores); desde el 2 en cualquiera de las peligrosas del Alma.
+- `soul_chest.js`: búsqueda de estructura acepta un id y se expone por `global` (`almaFindStructure`, `almaHardSpot`, …).
+  `progression.js`: `global.progDificultad`.
+- Verificado (sin jugadores conectados): tiers 0, 2 y 4 forzados; el log muestra los ítems reales del cofre; `cancelar` lo borra.

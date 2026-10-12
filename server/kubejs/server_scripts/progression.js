@@ -67,6 +67,9 @@ function progApplyDiff(server, st) { server.runCommandSilent(`improvedmobs diffi
 function progNow(server) { return Number(server.overworld().getLevelData().getGameTime()) }
 function progTell(server, json) { server.runCommandSilent(`tellraw @a ${JSON.stringify(json)}`) }
 
+// Dificultad actual (la usa supply_chest.js)
+global.progDificultad = server => progDiff(progState(server))
+
 // Fase actual (la usan otros scripts, p. ej. chaos_events.js)
 global.progFaseCache = -1
 global.progFase = server => {
