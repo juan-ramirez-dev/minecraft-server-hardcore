@@ -14,6 +14,7 @@ sube con el tiempo y con cada jefe, Nether y End mucho más peligrosos, y mecán
 - **Cofre del Alma**: si alguien muere, aparece un cofre (normalmente en una Ciudad Antigua) con un ítem para revivirlo.
 - **Cofre de Suministros**: cada 45–75 min de juego con todos los conectados vivos aparece un cofre en una estructura
   (coordenadas en el chat). El botín mejora con la dificultad: común → poco común → raro → épico → legendario (totems, armaduras encantadas, libros, netherite).
+- **Aldeanos sin intercambios fáciles**: no compran palos, cultivos, papel, carbón, carne, lana ni otros materiales baratos.
 - **Espectador restringido**: los muertos solo ven a través de los ojos de un jugador vivo.
 - **Alertas en el chat**: aviso cuando alguien queda con ≤ 3 ❤ o usa un Tótem de la Inmortalidad.
 

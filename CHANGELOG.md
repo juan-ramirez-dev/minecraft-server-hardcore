@@ -279,3 +279,9 @@ Muertes del mundo anterior (logs): Dread Hound, Nightmare Stalker (×2, además 
 - `soul_chest.js`: búsqueda de estructura acepta un id y se expone por `global` (`almaFindStructure`, `almaHardSpot`, …).
   `progression.js`: `global.progDificultad`.
 - Verificado (sin jugadores conectados): tiers 0, 2 y 4 forzados; el log muestra los ítems reales del cofre; `cancelar` lo borra.
+
+## 2026-10-12 — Aldeanos sin intercambios fáciles
+- `villager_trades.js` (nuevo): al hacer clic derecho en un aldeano se borran sus ofertas "material barato → esmeralda"
+  (palos, cultivos, bayas, kelp, cuerda, carbón, carne podrida, papel, libros, arcilla, pedernal, plumas, carnes, pescado,
+  cuero, piedra, lana). Aplica a los aldeanos ya existentes y a lo que desbloqueen al subir de nivel; las ventas no se tocan.
+- Anunciado en el chat con título "La dificultad sube" (tellraw por consola, una vez).
