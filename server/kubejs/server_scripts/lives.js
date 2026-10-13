@@ -3,6 +3,7 @@
 // - Un revivido (por /revivir o el Cofre) vuelve con 1 vida: su contador sigue gastado.
 // - Con hardcore=true el server pone espectador justo después del respawn → se pasa a supervivencia unos ticks más tarde.
 // - Lo llama soul_chest.js desde su EntityEvents.death (global.vidasMuerte) para que el orden sea fijo.
+// Las vidas de los conectados se ven en el marcador de la derecha (sidebar).
 // Admin (consola): /vidas <jugador> [n]
 // Nota Rhino: dentro de funciones se usa `var`.
 
@@ -60,6 +61,26 @@ PlayerEvents.respawned(e => {
   })
 })
 
+// Marcador a la derecha de la pantalla (sidebar): vidas de los conectados
+const VIDAS_OBJ = 'vidas'
+let vidasMostrados = []
+function vidasSidebar(server, st) {
+  if (vidasTicker == 20) {
+    server.runCommandSilent(`scoreboard objectives add ${VIDAS_OBJ} dummy ${JSON.stringify({ text: '❤ Vidas', color: 'red', bold: true })}`)
+    server.runCommandSilent(`scoreboard objectives setdisplay sidebar ${VIDAS_OBJ}`)
+  }
+  var ahora = []
+  server.players.forEach(p => {
+    var n = String(p.username)
+    ahora.push(n)
+    var v = Math.max(0, VIDAS_MAX - (st.muertes[n] || 0))
+    if (p.isSpectator() && !st.respawn[n]) v = 0
+    server.runCommandSilent(`scoreboard players set ${n} ${VIDAS_OBJ} ${v}`)
+  })
+  vidasMostrados.forEach(n => { if (ahora.indexOf(n) < 0) server.runCommandSilent(`scoreboard players reset ${n} ${VIDAS_OBJ}`) })
+  vidasMostrados = ahora
+}
+
 // Respaldo una vez por segundo (p. ej. se desconectó en la pantalla de muerte) + migración única
 let vidasTicker = 0
 ServerEvents.tick(e => {
@@ -67,6 +88,7 @@ ServerEvents.tick(e => {
   var server = e.server
   if (!server.persistentData.getBoolean('vidas_v1')) vidasMigrar(server)
   var st = vidasState(server)
+  vidasSidebar(server, st)
   if (!Object.keys(st.respawn).length) return
   server.players.forEach(p => {
     if (st.respawn[String(p.username)] && p.isSpectator()) vidasRevive(server, p, st)

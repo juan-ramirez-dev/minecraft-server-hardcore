@@ -292,3 +292,7 @@ Muertes del mundo anterior (logs): Dread Hound, Nightmare Stalker (×2, además 
 
 ## 2026-10-12 — Whitelist: + iMaikyi
 - Agregado directo en `whitelist.json` con UUID offline `13b38642-4f72-3250-8731-469b7758836c` (`OfflinePlayer:iMaikyi`) + `whitelist reload`.
+
+## 2026-10-12 — Vidas en pantalla
+- `lives.js`: marcador `vidas` ("❤ Vidas") en el sidebar con las vidas de los jugadores conectados (se actualiza cada 1 s;
+  los que se desconectan salen de la lista; muerto definitivo = 0).
