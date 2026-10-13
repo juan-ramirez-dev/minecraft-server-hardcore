@@ -289,3 +289,6 @@ Muertes del mundo anterior (logs): Dread Hound, Nightmare Stalker (×2, además 
 ## 2026-10-12 — Dormir: basta la mitad
 - `gamerule playersSleepingPercentage 50` (aplicado por consola en el mundo actual; `hub_core.js` lo fija también al construir el hub,
   para mundos nuevos). Los espectadores (muertos) no cuentan.
+
+## 2026-10-12 — Whitelist: + iMaikyi
+- Agregado directo en `whitelist.json` con UUID offline `13b38642-4f72-3250-8731-469b7758836c` (`OfflinePlayer:iMaikyi`) + `whitelist reload`.
