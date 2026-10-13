@@ -185,7 +185,7 @@ global.almaBuildVault = almaBuildVault
 function almaSpawnChest(server, reserva) {
   var level = server.overworld()
   var c = almaCenter(server)
-  var spot = null, where = ''
+  var spot = null, where = '', zona = null   // zona = centro de la estructura (lo que se anuncia, no el cofre)
   for (var j = 0; reserva && j < 6 && !spot; j++) {
     var a0 = Math.random() * 6.283185307179586, d0 = almaRand(600, 1800)
     var hs = almaFindHardStructure(level, c[0] + Math.cos(a0) * d0, c[1] + Math.sin(a0) * d0)
@@ -194,7 +194,7 @@ function almaSpawnChest(server, reserva) {
     var hd = Math.sqrt(Math.pow(hx - c[0], 2) + Math.pow(hz - c[1], 2))
     if (hd < 400 || hd > 2500) continue
     spot = almaHardSpot(level, hs)
-    if (spot) where = 'en ' + hs.name + (hs.spawners.length ? ` (${hs.spawners.length} spawners)` : '')
+    if (spot) { where = 'en ' + hs.name + (hs.spawners.length ? ` (${hs.spawners.length} spawners)` : ''); zona = [Math.round(hx), Math.round(hz)] }
   }
   for (var i = 0; !reserva && i < 4 && !spot; i++) {
     var a = Math.random() * 6.283185307179586, d = almaRand(800, 1600)
@@ -203,13 +203,14 @@ function almaSpawnChest(server, reserva) {
     var dist = Math.sqrt(Math.pow(city[0] - c[0], 2) + Math.pow(city[1] - c[1], 2))
     if (dist < 500 || dist > 3000) continue
     spot = almaFloorSpot(level, city[0], city[1], -51, -20, 30)
-    if (spot) where = 'en una Ciudad Antigua (guarida del Warden)'
+    if (spot) { where = 'en una Ciudad Antigua (guarida del Warden)'; zona = [city[0], city[1]] }
   }
   if (!spot) {
     var a2 = Math.random() * 6.283185307179586, d2 = almaRand(700, 1200)
     spot = almaBuildVault(server, Math.floor(c[0] + Math.cos(a2) * d2), Math.floor(c[1] + Math.sin(a2) * d2))
     where = 'en una cámara profunda custodiada'
   }
+  if (!zona) zona = [spot[0], spot[2]]
   // getBlock ya cargó el chunk: el setblock funciona
   level.getBlock(spot[0], spot[1], spot[2]).set('minecraft:air')
   almaCmd(server, `execute in minecraft:overworld run setblock ${spot[0]} ${spot[1]} ${spot[2]} minecraft:chest{CustomName:'{"text":"Cofre del Alma","color":"light_purple"}',Items:[{Slot:13b,id:"revivermod:reviver",Count:1b,tag:${ALMA_REVIVER_NBT}}]}`)
@@ -218,6 +219,7 @@ function almaSpawnChest(server, reserva) {
   var now = almaNow(server)
   st.active = true
   st.pos = spot
+  st.zona = zona
   st.end = now + ALMA_DURATION
   st.where = where
   st.reserva = !!reserva
@@ -230,13 +232,13 @@ function almaSpawnChest(server, reserva) {
   almaCmd(server, `bossbar set ${ALMA_BAR} players @a`)
   almaBarUpdate(server, st)
   almaCmd(server, 'title @a times 10 80 20')
-  almaCmd(server, `title @a subtitle ${JSON.stringify({ text: `${spot[0]} ${spot[1]} ${spot[2]}`, color: 'white' })}`)
+  almaCmd(server, `title @a subtitle ${JSON.stringify({ text: `Zona X ${zona[0]}  Z ${zona[1]}`, color: 'white' })}`)
   almaCmd(server, `title @a title ${JSON.stringify({ text: 'Cofre del Alma', color: 'light_purple', bold: true })}`)
   almaCmd(server, 'execute as @a at @s run playsound minecraft:block.respawn_anchor.charge master @s ~ ~ ~ 1 0.6')
   almaTell(server, '@a', [
-    { text: 'Apareció un Cofre del Alma ' + where + ' en ', color: 'white' },
-    { text: `X ${spot[0]}  Y ${spot[1]}  Z ${spot[2]}`, color: 'gold', bold: true },
-    { text: ` (Overworld). Desaparece en ${ALMA_DURATION / 1200} min. ` + (reserva
+    { text: 'Apareció un Cofre del Alma ' + where + '. Zona: ', color: 'white' },
+    { text: `X ${zona[0]}  Z ${zona[1]}`, color: 'gold', bold: true },
+    { text: ` (Overworld) — el cofre está escondido por ahí, hay que buscarlo. Desaparece en ${ALMA_DURATION / 1200} min. ` + (reserva
       ? 'Nadie ha muerto: su Reviver se puede guardar para la próxima muerte.'
       : 'Dentro hay un Reviver: renómbralo en un yunque con el nombre del muerto y haz clic derecho.'), color: 'white' }
   ])
@@ -246,7 +248,7 @@ function almaBarUpdate(server, st) {
   var left = Math.max(0, Math.ceil((st.end - almaNow(server)) / 20))
   var mm = Math.floor(left / 60), ss = left % 60
   almaCmd(server, `bossbar set ${ALMA_BAR} value ${left}`)
-  almaCmd(server, `bossbar set ${ALMA_BAR} name ${JSON.stringify([{ text: '✦ Cofre del Alma ', color: 'light_purple', bold: true }, { text: `${st.pos[0]} ${st.pos[1]} ${st.pos[2]} — ${mm}:${ss < 10 ? '0' : ''}${ss}`, color: 'white' }])}`)
+  almaCmd(server, `bossbar set ${ALMA_BAR} name ${JSON.stringify([{ text: '✦ Cofre del Alma ', color: 'light_purple', bold: true }, { text: `zona ${(st.zona || [st.pos[0], st.pos[2]]).join(' ')} — ${mm}:${ss < 10 ? '0' : ''}${ss}`, color: 'white' }])}`)
 }
 
 function almaRemoveChest(server, st) {

@@ -301,3 +301,8 @@ Muertes del mundo anterior (logs): Dread Hound, Nightmare Stalker (×2, además 
 - Bug: `caosState` calculaba `next` (próxima tirada) en cada lectura sin guardarlo, así que el contador se quedaba en 1200 s y
   **nunca salió ningún evento aleatorio**. Ahora se guarda la primera vez. `caosStart` deja `Caos: empieza <id>` en el log.
 - Tormenta Eléctrica, La Cacería y Francotiradores pasan de fase 1 a fase 2: sin caos hasta entrar al Nether.
+
+## 2026-10-12 — Cofres: se anuncia la zona, no el cofre
+- `soul_chest.js` y `supply_chest.js`: chat, título y bossbar muestran el centro de la estructura (`Zona X … Z …`) en lugar de
+  la posición exacta del cofre; hay que buscarlo dentro. `/alma estado` sigue mostrando la posición exacta (admin).
+- Cofre del Alma de reserva forzado (`/alma reserva`): cámara del Wroughtnaut, cofre en `348 24 -2045`.

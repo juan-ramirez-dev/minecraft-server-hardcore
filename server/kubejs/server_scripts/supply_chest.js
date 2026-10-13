@@ -155,7 +155,7 @@ function sumBuscarSitio(server, tier) {
     var hd = Math.sqrt(Math.pow(hx - c[0], 2) + Math.pow(hz - c[1], 2))
     if (hd < dMin * 0.7 || hd > dMax * 1.5) continue
     var spot = global.almaHardSpot(level, hs)
-    if (spot) return { pos: spot, where: 'en ' + (lista[id] || id) + (hs.spawners.length ? ` (${hs.spawners.length} spawners)` : '') }
+    if (spot) return { pos: spot, zona: [Math.round(hx), Math.round(hz)], where: 'en ' + (lista[id] || id) + (hs.spawners.length ? ` (${hs.spawners.length} spawners)` : '') }
   }
   var a2 = Math.random() * 6.283185307179586, d2 = sumRand(dMin, dMax)
   return { pos: global.almaBuildVault(server, Math.floor(c[0] + Math.cos(a2) * d2), Math.floor(c[1] + Math.sin(a2) * d2)), where: 'en una cámara profunda custodiada' }
@@ -174,6 +174,7 @@ function sumSpawn(server, tierForzado) {
   st = sumState(server)
   st.active = true
   st.pos = p
+  st.zona = sitio.zona || [p[0], p[2]]
   st.tier = tier
   st.where = sitio.where
   st.end = sumNow(server) + SUM_DURATION
@@ -186,15 +187,15 @@ function sumSpawn(server, tierForzado) {
   sumCmd(server, `bossbar set ${SUM_BAR} players @a`)
   sumBarUpdate(server, st)
   sumCmd(server, 'title @a times 10 80 20')
-  sumCmd(server, `title @a subtitle ${JSON.stringify({ text: `${p[0]} ${p[1]} ${p[2]}`, color: 'white' })}`)
+  sumCmd(server, `title @a subtitle ${JSON.stringify({ text: `Zona X ${st.zona[0]}  Z ${st.zona[1]}`, color: 'white' })}`)
   sumCmd(server, `title @a title ${JSON.stringify({ text: 'Cofre de Suministros', color: T.color, bold: true })}`)
   sumCmd(server, 'execute as @a at @s run playsound minecraft:block.chest.open master @s ~ ~ ~ 1 0.6')
   sumTell(server, [
     { text: 'Por mantenerse todos vivos apareció un cofre ', color: 'white' },
     { text: T.name, color: T.color, bold: true },
-    { text: ` ${sitio.where} en `, color: 'white' },
-    { text: `X ${p[0]}  Y ${p[1]}  Z ${p[2]}`, color: 'gold', bold: true },
-    { text: ` (Overworld). Desaparece en ${SUM_DURATION / 1200} min. A más dificultad, mejor botín.`, color: 'white' }
+    { text: ` ${sitio.where}. Zona: `, color: 'white' },
+    { text: `X ${st.zona[0]}  Z ${st.zona[1]}`, color: 'gold', bold: true },
+    { text: ` (Overworld) — el cofre está escondido por ahí. Desaparece en ${SUM_DURATION / 1200} min. A más dificultad, mejor botín.`, color: 'white' }
   ])
   var be = server.overworld().getBlock(p[0], p[1], p[2]).entity, lleno = []
   if (be) for (var k = 0; k < be.getContainerSize(); k++) { var it = be.getItem(k); if (!it.isEmpty()) lleno.push(String(it.id) + (it.nbt ? String(it.nbt) : '')) }
@@ -206,7 +207,7 @@ function sumBarUpdate(server, st) {
   var mm = Math.floor(left / 60), ss = left % 60
   var T = SUM_TIERS[st.tier || 0]
   sumCmd(server, `bossbar set ${SUM_BAR} value ${left}`)
-  sumCmd(server, `bossbar set ${SUM_BAR} name ${JSON.stringify([{ text: '✦ Suministros ' + T.name + ' ', color: T.color, bold: true }, { text: `${st.pos[0]} ${st.pos[1]} ${st.pos[2]} — ${mm}:${ss < 10 ? '0' : ''}${ss}`, color: 'white' }])}`)
+  sumCmd(server, `bossbar set ${SUM_BAR} name ${JSON.stringify([{ text: '✦ Suministros ' + T.name + ' ', color: T.color, bold: true }, { text: `zona ${(st.zona || [st.pos[0], st.pos[2]]).join(' ')} — ${mm}:${ss < 10 ? '0' : ''}${ss}`, color: 'white' }])}`)
 }
 
 function sumFinish(server, st, reason) {
