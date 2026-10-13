@@ -296,3 +296,8 @@ Muertes del mundo anterior (logs): Dread Hound, Nightmare Stalker (×2, además 
 ## 2026-10-12 — Vidas en pantalla
 - `lives.js`: marcador `vidas` ("❤ Vidas") en el sidebar con las vidas de los jugadores conectados (se actualiza cada 1 s;
   los que se desconectan salen de la lista; muerto definitivo = 0).
+
+## 2026-10-12 — Eventos del Caos: arreglo + sin caos antes del Nether
+- Bug: `caosState` calculaba `next` (próxima tirada) en cada lectura sin guardarlo, así que el contador se quedaba en 1200 s y
+  **nunca salió ningún evento aleatorio**. Ahora se guarda la primera vez. `caosStart` deja `Caos: empieza <id>` en el log.
+- Tormenta Eléctrica, La Cacería y Francotiradores pasan de fase 1 a fase 2: sin caos hasta entrar al Nether.

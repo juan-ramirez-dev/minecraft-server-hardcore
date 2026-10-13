@@ -2,7 +2,7 @@
 // - Aleatorios: cada ~20 min de juego (con jugadores vivos conectados) hay probabilidad de que empiece uno.
 // - Furia de la Luna: fija, cada 2 lunas llenas, dura toda la noche.
 // - Nunca afectan la zona segura del spawn/casino.
-// - Dependen de la fase de progresión (progression.js): ninguno en la fase 0, suaves en la 1 (a mitad de probabilidad), todos desde la 2.
+// - Dependen de la fase de progresión (progression.js): ninguno antes del Nether (fases 0–1), todos desde la 2.
 // Admin: /caos iniciar <evento> | /caos parar | /caos estado | /caos activar | /caos desactivar
 // Nota Rhino: dentro de funciones se usa `var` (let/const no se reinicializan bien dentro de bucles).
 
@@ -31,8 +31,9 @@ function caosState(server) {
   var st = s ? JSON.parse(s) : {}
   if (st.enabled === undefined) st.enabled = true
   if (!st.active) st.active = ''
-  if (!st.next) st.next = caosNow(server) + CAOS_CHECK_EVERY
   if (!st.furiaDay) st.furiaDay = -1
+  // Primera vez: hay que guardar la tirada, si no se recalcula en cada lectura y nunca llega
+  if (!st.next) { st.next = caosNow(server) + CAOS_CHECK_EVERY; server.persistentData.putString('caos', JSON.stringify(st)) }
   return st
 }
 function caosSave(server, st) { server.persistentData.putString('caos', JSON.stringify(st)) }
@@ -88,7 +89,7 @@ function caosSummon(server, p, type, spot) {
 // pulse(server, st): se llama cada `every` ticks
 const CAOS_EVENTS = {
   tormenta: {
-    name: 'Tormenta Eléctrica', desc: 'Todos los creepers están cargados', color: 'yellow', weight: 3, fase: 1, dur: 10 * 60 * 20,
+    name: 'Tormenta Eléctrica', desc: 'Todos los creepers están cargados', color: 'yellow', weight: 3, fase: 2, dur: 10 * 60 * 20,
     start: (server, st) => caosCmd(server, `weather thunder ${Math.ceil(st.dur / 20) + 30}`),
     onMob: (m) => { if (String(m.type) == 'minecraft:creeper') { m.mergeNbt({ powered: true }); m.addTag('caos_tormenta') } },
     end: (server) => {
@@ -97,7 +98,7 @@ const CAOS_EVENTS = {
     }
   },
   caceria: {
-    name: 'La Cacería', desc: 'Los monstruos te huelen desde el doble de distancia', color: 'red', weight: 3, fase: 1, dur: 10 * 60 * 20,
+    name: 'La Cacería', desc: 'Los monstruos te huelen desde el doble de distancia', color: 'red', weight: 3, fase: 2, dur: 10 * 60 * 20,
     onMob: (m) => {
       var inst = m.getAttribute($CaosAttributes.FOLLOW_RANGE)
       if (inst && !inst.hasModifier(new $CaosAttrMod(CAOS_FOLLOW_ID, 'caos_caceria', 1.0, $CaosAttrOp.MULTIPLY_BASE)))
@@ -140,7 +141,7 @@ const CAOS_EVENTS = {
     })
   },
   francotiradores: {
-    name: 'Francotiradores', desc: 'Los esqueletos llevan arcos de Poder', color: 'gray', weight: 2, fase: 1, dur: 10 * 60 * 20,
+    name: 'Francotiradores', desc: 'Los esqueletos llevan arcos de Poder', color: 'gray', weight: 2, fase: 2, dur: 10 * 60 * 20,
     onMob: (m) => {
       var t = String(m.type)
       if (t != 'minecraft:skeleton' && t != 'minecraft:stray') return
@@ -191,6 +192,7 @@ function caosBar(server, st) {
 }
 
 function caosStart(server, id, durOverride) {
+  console.info(`Caos: empieza ${id}`)
   var st = caosState(server)
   if (st.active) caosEnd(server, true)
   st = caosState(server)
@@ -261,9 +263,9 @@ ServerEvents.tick(e => {
     if (ev.pulse && now - st.lastPulse >= ev.every) { st.lastPulse = now; caosSave(server, st); ev.pulse(server, st) }
   }
   if (!st.enabled) return
-  // Progresión (progression.js): sin eventos en la fase 0; cada evento tiene su fase mínima
+  // Progresión (progression.js): sin eventos antes de la fase 2; cada evento tiene su fase mínima
   var fase = global.progFase ? global.progFase(server) : 4
-  if (fase < 1) return
+  if (fase < 2) return   // sin caos hasta entrar al Nether
 
   // Furia de la Luna: cada 2 lunas llenas (fase lunar 0), toda la noche
   var fullMoon = server.overworld().getMoonPhase() == 0
