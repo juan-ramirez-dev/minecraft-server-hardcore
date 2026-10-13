@@ -63,6 +63,7 @@ function hubBuild(server, at) {
     server.runCommandSilent(`tellraw @a[gamemode=creative] {"text":"Hub construido en ${x} ${y} ${z}","color":"green"}`)
   })
   server.runCommandSilent('gamerule spawnRadius 0')
+  server.runCommandSilent('gamerule playersSleepingPercentage 50')   // basta con que duerma la mitad
   var abs = p => [x + p[0], y + p[1], z + p[2]]
   global.hubSave(server, {
     origin: [x, y, z],

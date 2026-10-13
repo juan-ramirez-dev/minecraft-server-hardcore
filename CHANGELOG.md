@@ -285,3 +285,7 @@ Muertes del mundo anterior (logs): Dread Hound, Nightmare Stalker (×2, además 
   (palos, cultivos, bayas, kelp, cuerda, carbón, carne podrida, papel, libros, arcilla, pedernal, plumas, carnes, pescado,
   cuero, piedra, lana). Aplica a los aldeanos ya existentes y a lo que desbloqueen al subir de nivel; las ventas no se tocan.
 - Anunciado en el chat con título "La dificultad sube" (tellraw por consola, una vez).
+
+## 2026-10-12 — Dormir: basta la mitad
+- `gamerule playersSleepingPercentage 50` (aplicado por consola en el mundo actual; `hub_core.js` lo fija también al construir el hub,
+  para mundos nuevos). Los espectadores (muertos) no cuentan.
