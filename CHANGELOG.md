@@ -306,3 +306,13 @@ Muertes del mundo anterior (logs): Dread Hound, Nightmare Stalker (×2, además 
 - `soul_chest.js` y `supply_chest.js`: chat, título y bossbar muestran el centro de la estructura (`Zona X … Z …`) en lugar de
   la posición exacta del cofre; hay que buscarlo dentro. `/alma estado` sigue mostrando la posición exacta (admin).
 - Cofre del Alma de reserva forzado (`/alma reserva`): cámara del Wroughtnaut, cofre en `348 24 -2045`.
+
+## 2026-10-13 — Gulag "Último en pie"
+- `gulag.js` (nuevo): `/gulag iniciar` (consola) mete a todos los muertos definitivos conectados (≥ 2) en una arena con el
+  mismo kit (hierro, espada, arco + 32 flechas, escudo, 2 manzanas doradas) en modo aventura. Oleadas de mobs vanilla cada vez
+  más duras (zombi/esqueleto/araña → husk/stray → creeper/bruja → vindicador/saqueador/blaze → wither skeleton/evocador/bruto
+  → ravager); la siguiente sale cuando no queda ninguno o a los 60 s. Sobreviven `floor(n/2)` (mín. 1): vuelven al lobby
+  en supervivencia con 1 vida y salen de la lista del Cofre del Alma. Salirse de la arena = tp al centro; desconectarse = eliminado.
+- Morir en el gulag no gasta vidas ni crea Cofre del Alma: `soul_chest.js` llama primero a `global.gulagMuerte`.
+- Arena: caja de deepslate 33×12×33 en `296 -40 -152` (hub +200 en X, fuera de la zona segura), piso de ladrillos de blackstone
+  con linternas de mar, 4 pilares. Construida y verificada bloque a bloque. Sin probar aún: una partida real (no había muertos conectados).

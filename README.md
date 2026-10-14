@@ -15,6 +15,7 @@ sube con el tiempo y con cada jefe, Nether y End mucho más peligrosos, y mecán
 - **Cofre de Suministros**: cada 45–75 min de juego con todos los conectados vivos aparece un cofre en una estructura
   (coordenadas en el chat). El botín mejora con la dificultad: común → poco común → raro → épico → legendario (totems, armaduras encantadas, libros, netherite).
 - **Aldeanos sin intercambios fáciles**: no compran palos, cultivos, papel, carbón, carne, lana ni otros materiales baratos.
+- **Gulag**: los muertos definitivos conectados pelean juntos contra oleadas en una arena; la mitad que quede en pie vuelve con 1 vida.
 - **Espectador restringido**: los muertos solo ven a través de los ojos de un jugador vivo.
 - **Alertas en el chat**: aviso cuando alguien queda con ≤ 3 ❤ o usa un Tótem de la Inmortalidad.
 
@@ -66,6 +67,7 @@ Pack para jugadores: `python3 scripts/build-mrpack.py 1.1.0` → `dist/Hardcore-
 | `/alma forzar` · `/alma reserva` · `/alma estado` · `/alma cancelar` · `/alma dar <jugador>` | Cofre del Alma (`reserva`: el periódico, sin muertos) |
 | `/vidas <jugador> [n]` | Ver o fijar las vidas restantes (0–3) |
 | `/suministros forzar [tier]` · `/suministros estado` · `/suministros cancelar` | Cofre de Suministros (tier 0–4; sin tier usa la dificultad actual) |
+| `/gulag iniciar` · `/gulag estado` · `/gulag cancelar` · `/gulag construir` | Gulag "Último en pie" (mínimo 2 muertos conectados; sobrevive la mitad) |
 | `/revivir <jugador> [muerte\|<otro jugador>]` | Revive donde murió o junto a otro; si no está conectado queda pendiente hasta que entre |
 | `/tag <jugador> add espectador_libre` | Libera a un admin del espectador restringido |
 

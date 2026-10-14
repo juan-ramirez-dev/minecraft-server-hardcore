@@ -276,6 +276,7 @@ function almaFinish(server, st, reason) {
 EntityEvents.death(e => {
   if (!e.entity.player) return
   var server = e.server
+  if (global.gulagMuerte && global.gulagMuerte(server, e.entity)) return  // murió en el gulag (gulag.js)
   if (global.vidasMuerte && !global.vidasMuerte(server, e.entity)) return  // le quedan vidas (lives.js)
   var st = almaState(server)
   var name = String(e.entity.username)
